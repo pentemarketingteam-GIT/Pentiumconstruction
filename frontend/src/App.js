@@ -2,6 +2,7 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import Layout from "@/components/sop/Layout";
+import PlayLauncher from "@/components/sop/PlayLauncher";
 
 import Home from "@/pages/sop/Home";
 import Parents from "@/pages/sop/Parents";
@@ -29,6 +30,7 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Toaster position="top-center" richColors />
+        <PlayLauncher />
         <Routes>
           {/* Dynamic AI-interactive website (full screen) */}
           <Route path="/explore" element={<Explore />} />

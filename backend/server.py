@@ -88,8 +88,10 @@ async def list_enquiries():
 
 # Valid content panels the assistant may surface on the dynamic canvas.
 VALID_PANELS = [
-    "welcome", "holiday_camps", "clubs_parents", "how_to_book", "faqs_pricing",
-    "sports_classes", "schools_overview", "pe", "swim_ed", "game_set_maths",
+    "welcome", "holiday_camps", "camps_create", "camps_sports", "camps_locations",
+    "camps_bring", "clubs_parents", "how_to_book", "faqs_pricing", "sports_classes",
+    "schools_overview", "pe", "pe_pricing", "pe_lunchtime", "swim_ed", "swim_ed_benefits",
+    "swim_ed_features", "swim_ed_process", "swim_ed_pricing", "game_set_maths",
     "extra_curricular", "tournaments", "clubs_schools", "venues", "why_us",
     "team", "contact", "booking",
 ]
@@ -168,7 +170,11 @@ OUTPUT FORMAT — respond with ONE valid JSON object ONLY (no prose outside it, 
   }
 }
 VALID panel keys: """ + ", ".join(VALID_PANELS) + """.
-Choose the most relevant 1–3 panels for the user's need (e.g. holiday_camps, swim_ed, pe, faqs_pricing, contact, booking).
+Always choose the MOST SPECIFIC panel that matches the user's question so the visual panel changes with every reply:
+- Swim:ED — benefits -> swim_ed_benefits; features -> swim_ed_features; how it works/process/steps -> swim_ed_process; pricing/cost -> swim_ed_pricing; general -> swim_ed.
+- Holiday camps — create/arts/crafts groups -> camps_create; sports/multi-sports -> camps_sports; locations/venues -> camps_locations; what to bring/not bring -> camps_bring; prices/hours/faqs -> faqs_pricing; general -> holiday_camps.
+- PE — pricing/tiers/add-ons -> pe_pricing; lunchtime -> pe_lunchtime; general -> pe.
+Return 1 panel (the single best match). Never repeat the same generic panel when a more specific one fits.
 """.strip()
 
 

@@ -3,11 +3,11 @@ import axios from "axios";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Sparkles, Loader2, Bot, User, Home, RotateCcw } from "lucide-react";
+import { Send, Sparkles, Loader2, Bot, User, RotateCcw, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import Header from "@/components/sop/Header";
 import ParticleField from "@/components/sop/ParticleField";
 import DynamicCanvas from "@/components/sop/DynamicCanvas";
+import { BookNowButton } from "@/components/sop/Primitives";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 
@@ -57,9 +57,11 @@ export default function Explore() {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading]);
 
-  const send = useCallback(async (text) => {
+  const send = useCallback(async (text, goto) => {
+    if (goto) setView(goto);            // ALWAYS change the left panel instantly, even mid-reply
     const msg = (text || "").trim();
-    if (!msg || loading) return;
+    if (!msg) return;
+    if (loading) return;                // avoid overlapping requests (view already updated above)
     setInput("");
     setSuggestions([]);
     setMessages((m) => [...m, { role: "user", content: msg }]);
@@ -67,7 +69,7 @@ export default function Explore() {
     try {
       const { data } = await axios.post(`${API}/assistant/chat`, { session_id: sid.current, message: msg });
       setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
-      if (data.panels && data.panels.length) setView(data.panels[0]);
+      if (!goto && data.panels && data.panels.length) setView(data.panels[0]);
       setSuggestions(data.suggestions || []);
       if (data.audience) setAudience(data.audience);
       if (data.lead_submitted) {
@@ -93,7 +95,19 @@ export default function Explore() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-white">
-      <Header />
+      {/* Minimal top bar (focused AI experience) */}
+      <header className="flex h-[72px] shrink-0 items-center justify-between border-b border-sop-border bg-white/90 px-5 backdrop-blur-md sm:px-8">
+        <Link to="/" className="flex items-center gap-2.5">
+          <span className="grid h-10 w-10 place-items-center rounded-2xl bg-sop-blue text-white shadow-play"><span className="font-display text-xl font-700">S</span></span>
+          <span className="hidden font-display text-xl font-700 text-sop-ink sm:inline">School <span className="text-sop-coral">of</span> Play</span>
+        </Link>
+        <div className="flex items-center gap-2">
+          <Link to="/" className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 font-display text-sm font-600 text-sop-ink ring-2 ring-sop-border transition hover:ring-sop-blue">
+            <ArrowLeft className="h-4 w-4" /> Back to website
+          </Link>
+          <BookNowButton size="md" className="hidden sm:inline-flex" />
+        </div>
+      </header>
 
       <div className="grid min-h-0 flex-1 lg:grid-cols-[1fr_400px]">
         {/* ===== Live, seamless, interactive canvas (no scroll) ===== */}
@@ -143,7 +157,6 @@ export default function Explore() {
               </div>
             </div>
             <div className="flex items-center gap-1">
-              <Link to="/" className="grid h-9 w-9 place-items-center rounded-xl text-sop-ink/60 transition hover:bg-sop-mist hover:text-sop-blue" title="Back to site"><Home className="h-4 w-4" /></Link>
               <button onClick={reset} className="grid h-9 w-9 place-items-center rounded-xl text-sop-ink/60 transition hover:bg-sop-mist hover:text-sop-blue" title="New conversation"><RotateCcw className="h-4 w-4" /></button>
             </div>
           </div>

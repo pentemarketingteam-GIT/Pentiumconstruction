@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, ChevronDown, Phone, Sparkles, LayoutGrid } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, X, ChevronDown, Phone } from "lucide-react";
 import { NAV, CONTACT } from "@/lib/sopContent";
 import { BookNowButton } from "@/components/sop/Primitives";
 
@@ -10,34 +10,10 @@ function Logo() {
       <span className="grid h-10 w-10 place-items-center rounded-2xl bg-sop-blue text-white shadow-play">
         <span className="font-display text-xl font-700 leading-none">S</span>
       </span>
-      <span className="hidden whitespace-nowrap font-display text-xl font-700 leading-none text-sop-ink sm:inline">
+      <span className="whitespace-nowrap font-display text-xl font-700 leading-none text-sop-ink">
         School <span className="text-sop-coral">of</span> Play
       </span>
     </Link>
-  );
-}
-
-/* Segmented Static | Dynamic mode toggle */
-function ModeSegments({ isDynamic }) {
-  const navigate = useNavigate();
-  const base = "relative z-10 flex items-center gap-1.5 rounded-full px-4 py-2 font-display text-sm font-700 transition-colors";
-  return (
-    <div className="flex items-center rounded-full bg-sop-ink p-1 shadow-play">
-      <button
-        onClick={() => navigate("/")}
-        className={`${base} ${!isDynamic ? "bg-white text-sop-ink" : "text-white/70 hover:text-white"}`}
-        aria-pressed={!isDynamic}
-      >
-        <LayoutGrid className="h-4 w-4" /> Static
-      </button>
-      <button
-        onClick={() => navigate("/explore")}
-        className={`${base} ${isDynamic ? "bg-gradient-to-r from-sop-yellow to-sop-coral text-sop-ink" : "text-white/70 hover:text-white"}`}
-        aria-pressed={isDynamic}
-      >
-        <Sparkles className="h-4 w-4" /> Dynamic
-      </button>
-    </div>
   );
 }
 
@@ -45,10 +21,7 @@ function DesktopDropdown({ group }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-      <Link
-        to={group.to}
-        className="flex items-center gap-1 rounded-full px-3 py-2 font-display text-[15px] font-600 text-sop-ink/85 transition-colors hover:bg-sop-mist hover:text-sop-blue"
-      >
+      <Link to={group.to} className="flex items-center gap-1 rounded-full px-3.5 py-2 font-display text-[15px] font-600 text-sop-ink/85 transition-colors hover:bg-sop-mist hover:text-sop-blue">
         {group.label}
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
       </Link>
@@ -72,7 +45,6 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState(null);
   const location = useLocation();
-  const isDynamic = location.pathname.startsWith("/explore");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -89,44 +61,30 @@ export default function Header() {
   const groups = [NAV.parents, NAV.schools, NAV.about];
 
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled || isDynamic ? "bg-white/90 shadow-play backdrop-blur-md" : "bg-white/60 backdrop-blur-sm"}`}>
-      <div className="sop-container flex h-[72px] items-center gap-3">
-        {/* Left zone */}
-        <div className="flex min-w-0 flex-1 items-center gap-1">
-          <Logo />
-          {!isDynamic && (
-            <nav className="ml-2 hidden items-center gap-0.5 lg:flex">
-              {groups.map((g) => <DesktopDropdown key={g.to} group={g} />)}
-              <Link to="/contact" className="rounded-full px-3 py-2 font-display text-[15px] font-600 text-sop-ink/85 transition-colors hover:bg-sop-mist hover:text-sop-blue">
-                Contact
-              </Link>
-            </nav>
-          )}
+    <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/90 shadow-play backdrop-blur-md" : "bg-white/60 backdrop-blur-sm"}`}>
+      <div className="sop-container flex h-[72px] items-center justify-between gap-4">
+        <Logo />
+
+        <nav className="hidden items-center gap-1 lg:flex">
+          {groups.map((g) => <DesktopDropdown key={g.to} group={g} />)}
+          <Link to="/contact" className="rounded-full px-3.5 py-2 font-display text-[15px] font-600 text-sop-ink/85 transition-colors hover:bg-sop-mist hover:text-sop-blue">
+            Contact
+          </Link>
+        </nav>
+
+        <div className="hidden items-center gap-3 lg:flex">
+          <a href={CONTACT.phoneHref} className="hidden items-center gap-2 font-display text-sm font-600 text-sop-ink/80 hover:text-sop-blue xl:flex">
+            <Phone className="h-4 w-4" /> {CONTACT.phone}
+          </a>
+          <BookNowButton size="md" />
         </div>
 
-        {/* Center zone: mode toggle */}
-        <div className="shrink-0">
-          <ModeSegments isDynamic={isDynamic} />
-        </div>
-
-        {/* Right zone */}
-        <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
-          {!isDynamic && (
-            <a href={CONTACT.phoneHref} className="hidden items-center gap-2 font-display text-sm font-600 text-sop-ink/80 hover:text-sop-blue xl:flex">
-              <Phone className="h-4 w-4" /> {CONTACT.phone}
-            </a>
-          )}
-          <BookNowButton size="md" className="hidden sm:inline-flex" />
-          {!isDynamic && (
-            <button className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-sop-mist text-sop-ink lg:hidden" onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle menu">
-              {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          )}
-        </div>
+        <button className="grid h-11 w-11 place-items-center rounded-2xl bg-sop-mist text-sop-ink lg:hidden" onClick={() => setMobileOpen((v) => !v)} aria-label="Toggle menu">
+          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </div>
 
-      {/* Mobile menu (static only) */}
-      {mobileOpen && !isDynamic && (
+      {mobileOpen && (
         <div className="lg:hidden">
           <div className="sop-container space-y-2 border-t border-sop-border bg-white pb-6 pt-4">
             {groups.map((g) => (

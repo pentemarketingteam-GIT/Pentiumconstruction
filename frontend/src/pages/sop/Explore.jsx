@@ -50,40 +50,71 @@ export default function Explore() {
   const [audience, setAudience] = useState("unknown");
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(false);
   const scrollRef = useRef(null);
   const sid = useRef(sessionId());
+  const streamTimer = useRef(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages, loading]);
+  }, [messages, loading, streaming]);
+
+  useEffect(() => () => clearTimeout(streamTimer.current), []);
+
+  // Reveal the assistant reply word-by-word for a lively, "typing" feel.
+  const streamReply = (fullText) => {
+    const tokens = String(fullText || "").split(/(\s+)/);
+    setMessages((m) => [...m, { role: "assistant", content: "" }]);
+    setStreaming(true);
+    let i = 0;
+    const tick = () => {
+      i += 1;
+      setMessages((m) => {
+        const copy = m.slice();
+        const last = copy[copy.length - 1];
+        if (last && last.role === "assistant") {
+          copy[copy.length - 1] = { ...last, content: tokens.slice(0, i).join("") };
+        }
+        return copy;
+      });
+      if (i < tokens.length) {
+        streamTimer.current = setTimeout(tick, 24);
+      } else {
+        setStreaming(false);
+      }
+    };
+    streamTimer.current = setTimeout(tick, 24);
+  };
 
   const send = useCallback(async (text, goto) => {
     if (goto) setView(goto);            // ALWAYS change the left panel instantly, even mid-reply
     const msg = (text || "").trim();
     if (!msg) return;
-    if (loading) return;                // avoid overlapping requests (view already updated above)
+    if (loading || streaming) return;   // avoid overlapping requests / streams
     setInput("");
     setSuggestions([]);
     setMessages((m) => [...m, { role: "user", content: msg }]);
     setLoading(true);
     try {
       const { data } = await axios.post(`${API}/assistant/chat`, { session_id: sid.current, message: msg });
-      setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+      setLoading(false);
       if (!goto && data.panels && data.panels.length) setView(data.panels[0]);
-      setSuggestions(data.suggestions || []);
       if (data.audience) setAudience(data.audience);
+      streamReply(data.reply);          // stream the text in word-by-word
+      setSuggestions(data.suggestions || []);
       if (data.lead_submitted) {
         confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 }, colors: ["#2A54E4", "#FFC22E", "#2BC183", "#FF5C79", "#8B5CF6"] });
         toast.success("Enquiry sent to the School of Play team!");
       }
     } catch (e) {
-      setMessages((m) => [...m, { role: "assistant", content: "Sorry, I'm having trouble right now. Please try again, or call us on 0161 726 5022." }]);
-    } finally {
       setLoading(false);
+      setMessages((m) => [...m, { role: "assistant", content: "Sorry, I'm having trouble right now. Please try again, or call us on 0161 726 5022." }]);
     }
-  }, [loading]);
+  }, [loading, streaming]);
 
   const reset = () => {
+    clearTimeout(streamTimer.current);
+    setStreaming(false);
     const id = newSession();
     localStorage.setItem("sop_session", id);
     sid.current = id;
@@ -162,13 +193,21 @@ export default function Explore() {
           </div>
 
           <div ref={scrollRef} className="min-h-0 flex-1 space-y-3.5 overflow-y-auto p-4">
-            {messages.map((m, i) => (<Bubble key={i} role={m.role}>{m.content}</Bubble>))}
+            {messages.map((m, i) => {
+              const isStreamingLast = streaming && i === messages.length - 1 && m.role === "assistant";
+              return (
+                <Bubble key={i} role={m.role}>
+                  {m.content}
+                  {isStreamingLast && <span className="ml-0.5 inline-block h-3.5 w-[2px] translate-y-0.5 animate-pulse bg-sop-blue align-middle" />}
+                </Bubble>
+              );
+            })}
             {loading && (
               <Bubble role="assistant"><span className="inline-flex items-center gap-1.5 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> thinking…</span></Bubble>
             )}
           </div>
 
-          {suggestions.length > 0 && (
+          {suggestions.length > 0 && !streaming && (
             <div className="flex flex-wrap gap-2 border-t border-sop-border px-3 py-2.5">
               {suggestions.map((s) => (
                 <button key={s} onClick={() => send(s)} className="rounded-full bg-white px-3 py-1.5 text-xs font-600 text-sop-blue ring-1 ring-sop-blue/15 transition hover:bg-sop-blue/10">{s}</button>
@@ -178,7 +217,7 @@ export default function Explore() {
 
           <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex items-center gap-2 border-t border-sop-border bg-white/70 p-3">
             <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about camps, clubs, PE…" className="flex-1 rounded-full border-2 border-sop-border bg-white px-4 py-2.5 text-[14px] text-sop-ink outline-none transition-colors focus:border-sop-blue" />
-            <button type="submit" disabled={loading || !input.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sop-blue text-white shadow-play transition hover:bg-sop-bluedeep disabled:opacity-50"><Send className="h-5 w-5" /></button>
+            <button type="submit" disabled={loading || streaming || !input.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sop-blue text-white shadow-play transition hover:bg-sop-bluedeep disabled:opacity-50"><Send className="h-5 w-5" /></button>
           </form>
         </aside>
       </div>

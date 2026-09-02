@@ -101,3 +101,58 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Rebuild the site as a brand-new "School of Play" website on the Careplus code foundation.
+  Careplus AI/auth/intake/TTS features were removed. Backend was slimmed to a single enquiry
+  submission/storage endpoint matching the School of Play contact form fields.
+
+backend:
+  - task: "Enquiry submission + storage API (/api/enquiries POST & GET)"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Rewrote server.py. New EnquiryCreate model with fields: full_name, email, phone, audience, service, school_name_location, enquiry (required), mailing_list (bool), source. POST /api/enquiries stores to db.enquiries and returns EnquirySubmission (uuid id + created_at). GET /api/enquiries lists newest-first. Removed all Careplus AI/auth/intake endpoints. Also recreated missing .env files (MONGO_URL, DB_NAME=schoolofplay, REACT_APP_BACKEND_URL) which had been lost. Needs testing: valid submit, required-field validation (missing full_name/email/enquiry -> 422), invalid email -> 422, GET list returns stored docs, no Mongo ObjectId leakage."
+        -working: true
+        -agent: "testing"
+        -comment: "Comprehensive backend testing completed - ALL 8 TESTS PASSED. Created backend_test.py with full test coverage. Results: (1) GET /api/ health check returns correct message and status. (2) POST /api/enquiries with full payload (all fields) returns 200 with valid UUID id, ISO created_at, all fields echoed, no _id leakage. (3) POST /api/enquiries with minimal payload (only required fields) returns 200 with defaults applied (mailing_list=false). (4-6) Validation correctly rejects missing required fields (full_name, email, enquiry) with 422. (7) Validation correctly rejects invalid email format with 422. (8) GET /api/enquiries returns list of enquiries, newest first, all with valid UUID ids, created_at timestamps, no _id leakage, and all created enquiries present. Backend API is fully functional and production-ready."
+
+frontend:
+  - task: "School of Play website (design system, pages, particle interaction)"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "New design system + 16 pages built. Not yet tested by agent — awaiting user permission before frontend testing per protocol."
+
+metadata:
+  created_by: "main_agent"
+  version: "2.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Enquiry submission + storage API (/api/enquiries POST & GET)"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+    -agent: "main"
+    -message: "Backend slimmed to a single enquiry API for School of Play. Please test /api/enquiries POST (valid + validation errors) and GET. All routes are under /api prefix. DB is 'schoolofplay'. Do not test frontend yet."
+    -agent: "testing"
+    -message: "8/8 backend tests passed. GET /api/ health OK; POST /api/enquiries full + minimal submissions OK with UUID id and ISO created_at, no _id leakage; 422 on missing full_name/email/enquiry and invalid email; GET /api/enquiries returns newest-first list. Backend production-ready."
+    -agent: "testing"
+    -message: "Backend testing complete - ALL TESTS PASSED (8/8). The enquiry API is fully functional: health check works, POST creates enquiries with proper UUID ids and validation, GET lists enquiries correctly ordered newest-first with no MongoDB _id leakage. No issues found. Backend is production-ready."

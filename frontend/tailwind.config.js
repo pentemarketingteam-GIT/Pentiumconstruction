@@ -7,10 +7,16 @@ module.exports = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			display: ['Fredoka', 'sans-serif'],
+  			sans: ['Nunito', 'system-ui', 'sans-serif'],
+  		},
   		borderRadius: {
   			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
+  			md: 'calc(var(--radius) - 4px)',
+  			sm: 'calc(var(--radius) - 8px)',
+  			'2xl': 'calc(var(--radius) + 6px)',
+  			'3xl': 'calc(var(--radius) + 14px)'
   		},
   		colors: {
   			background: 'hsl(var(--background))',
@@ -46,6 +52,18 @@ module.exports = {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
+  			sop: {
+  				blue: 'hsl(var(--sop-blue))',
+  				bluedeep: 'hsl(var(--sop-blue-deep))',
+  				sky: 'hsl(var(--sop-sky))',
+  				yellow: 'hsl(var(--sop-yellow))',
+  				green: 'hsl(var(--sop-green))',
+  				coral: 'hsl(var(--sop-coral))',
+  				purple: 'hsl(var(--sop-purple))',
+  				ink: 'hsl(var(--sop-ink))',
+  				cream: 'hsl(var(--sop-cream))',
+  				mist: 'hsl(var(--sop-mist))'
+  			},
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',
@@ -56,20 +74,12 @@ module.exports = {
   		},
   		keyframes: {
   			'accordion-down': {
-  				from: {
-  					height: '0'
-  				},
-  				to: {
-  					height: 'var(--radix-accordion-content-height)'
-  				}
+  				from: { height: '0' },
+  				to: { height: 'var(--radix-accordion-content-height)' }
   			},
   			'accordion-up': {
-  				from: {
-  					height: 'var(--radix-accordion-content-height)'
-  				},
-  				to: {
-  					height: '0'
-  				}
+  				from: { height: 'var(--radix-accordion-content-height)' },
+  				to: { height: '0' }
   			}
   		},
   		animation: {

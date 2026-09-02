@@ -2,215 +2,320 @@ import {
   HOLIDAY_CAMPS, FAQS, CLUBS_PARENTS, CLUBS_SCHOOLS, SCHOOLS, PE, SWIM,
   GSM, EXTRA_CURRICULAR, TOURNAMENTS, WHY_US, TEAM, HOME, IMAGES, CONTACT,
 } from "@/lib/sopContent";
-import { ChipList, TickList, PriceCard, BookNowButton, CTALink, Eyebrow } from "@/components/sop/Primitives";
-import { Waves, Trophy, Calculator, Dumbbell, Sunrise, Star, Phone, Mail, MapPin, Sparkles } from "lucide-react";
+import { BookNowButton } from "@/components/sop/Primitives";
+import {
+  Sparkles, ArrowRight, Waves, Trophy, Calculator, Dumbbell, Sunrise, Tent,
+  Star, Phone, Mail, MapPin, Palette, Clock,
+} from "lucide-react";
 
-function Panel({ title, eyebrow, color = "blue", children }) {
+/* ---------- shared building blocks (all fit inside a fixed-height frame) ---------- */
+
+const EY = {
+  blue: "text-sop-blue", coral: "text-sop-coral", green: "text-sop-green",
+  purple: "text-sop-purple", yellow: "text-[#8a6a00]", sky: "text-sop-sky",
+};
+
+function Frame({ banner, eyebrow, eyebrowColor = "blue", title, desc, children, footer }) {
   return (
-    <div className="rounded-3xl bg-white p-6 shadow-play ring-1 ring-sop-border">
-      {eyebrow && <Eyebrow color={color}>{eyebrow}</Eyebrow>}
-      {title && <h3 className="mt-2 font-display text-xl font-700 text-sop-ink">{title}</h3>}
-      <div className="mt-4">{children}</div>
+    <div className="flex h-full flex-col">
+      {banner}
+      <div className={banner ? "mt-4" : ""}>
+        {eyebrow && (
+          <span className={`font-display text-xs font-700 uppercase tracking-wide ${EY[eyebrowColor]}`}>{eyebrow}</span>
+        )}
+        <h2 className="mt-1 font-display text-2xl font-700 leading-tight text-sop-ink sm:text-3xl">{title}</h2>
+        {desc && <p className="mt-2 max-w-xl text-[15px] leading-relaxed text-muted-foreground">{desc}</p>}
+      </div>
+      <div className="mt-4 min-h-0 flex-1">{children}</div>
+      {footer && <div className="mt-3">{footer}</div>}
     </div>
   );
 }
 
-const PANELS = {
-  welcome: () => (
-    <Panel eyebrow="Welcome" color="coral" title="What can I help you with?">
-      <p className="text-muted-foreground">
-        Ask me anything about School of Play — holiday camps and clubs for your children, or PE, Swim:ED and wraparound care for your school.
-      </p>
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-2xl bg-sop-coral/8 p-4 ring-1 ring-sop-coral/15">
-          <p className="font-display font-700 text-sop-coral">For Parents</p>
-          <p className="text-sm text-muted-foreground">Camps, clubs, activities & booking.</p>
-        </div>
-        <div className="rounded-2xl bg-sop-blue/8 p-4 ring-1 ring-sop-blue/15">
-          <p className="font-display font-700 text-sop-blue">For Schools</p>
-          <p className="text-sm text-muted-foreground">PE, Swim:ED, tournaments & more.</p>
-        </div>
+function AskCard({ title, subtitle, onAsk, prompt }) {
+  return (
+    <button
+      onClick={() => onAsk && onAsk(prompt)}
+      className="group flex w-full flex-col justify-between rounded-2xl bg-white/90 p-4 text-left shadow-play ring-1 ring-sop-border transition-all hover:-translate-y-0.5 hover:ring-sop-blue"
+    >
+      <p className="font-display font-700 text-sop-ink">{title}</p>
+      {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
+      <ArrowRight className="mt-2 h-4 w-4 text-sop-blue/60 transition-transform group-hover:translate-x-1" />
+    </button>
+  );
+}
+
+function AskChips({ items, onAsk, promptFor }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((it) => (
+        <button
+          key={it}
+          onClick={() => onAsk && onAsk(promptFor ? promptFor(it) : it)}
+          className="rounded-full bg-white/90 px-3.5 py-2 text-sm font-600 text-sop-ink shadow-play ring-1 ring-sop-border transition hover:-translate-y-0.5 hover:text-sop-blue"
+        >
+          {it}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function Banner({ img, label, color = "blue", Icon = Sparkles }) {
+  const grad = {
+    blue: "from-sop-blue/85 to-sop-purple/85", coral: "from-sop-coral/85 to-sop-purple/85",
+    green: "from-sop-green/85 to-sop-blue/85", sky: "from-sop-sky/85 to-sop-blue/85",
+    purple: "from-sop-purple/85 to-sop-blue/85", yellow: "from-sop-yellow/90 to-sop-coral/85",
+  }[color];
+  return (
+    <div className="relative h-36 w-full shrink-0 overflow-hidden rounded-3xl shadow-play sm:h-44">
+      {img && <img src={img} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />}
+      <div className={`absolute inset-0 bg-gradient-to-br ${grad} mix-blend-multiply`} />
+      <div className="absolute bottom-4 left-4 flex items-center gap-2 font-display text-sm font-700 uppercase tracking-wide text-white">
+        <Icon className="h-4 w-4" /> {label}
       </div>
-    </Panel>
+    </div>
+  );
+}
+
+/* ---------- the views (each designed to fit the viewport, no scroll) ---------- */
+
+const VIEWS = {
+  welcome: (onAsk) => (
+    <Frame
+      banner={<Banner img={IMAGES.heroKids} label="AI Experience" color="yellow" />}
+      eyebrow="Play Assistant" eyebrowColor="coral"
+      title="Welcome to School of Play"
+      desc="Ask me anything about camps, clubs, PE and Swim:ED. This panel updates live as we chat — tap a card to dive in."
+    >
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <AskCard title="Holiday Camps" subtitle="Ages 3.5–11" onAsk={onAsk} prompt="Tell me about your holiday camps" />
+        <AskCard title="After-School Clubs" subtitle="Wraparound care" onAsk={onAsk} prompt="Tell me about before and after school clubs for parents" />
+        <AskCard title="PE & Sport" subtitle="For schools" onAsk={onAsk} prompt="I'm a school — tell me about your PE and sports provision" />
+        <AskCard title="Swim:ED" subtitle="On-site pool" onAsk={onAsk} prompt="Tell me about Swim:ED" />
+        <AskCard title="Tournaments" subtitle="Free to enter" onAsk={onAsk} prompt="Tell me about your free sports tournaments" />
+        <AskCard title="Pricing" subtitle="Camps & schools" onAsk={onAsk} prompt="How much do the holiday camps cost?" />
+      </div>
+    </Frame>
   ),
 
-  holiday_camps: () => (
-    <Panel eyebrow={HOLIDAY_CAMPS.campaignTitle} color="coral" title="Holiday Camps (ages 3.5–11)">
-      <img src={IMAGES.parachute} alt="Children at a holiday camp" className="mb-4 aspect-[16/9] w-full rounded-2xl object-cover" loading="lazy" />
-      <p className="text-muted-foreground">{HOLIDAY_CAMPS.campaignBlurb}</p>
-      <p className="mt-3 text-sm font-700 text-sop-ink">Create Groups {HOLIDAY_CAMPS.createGroups.ages}</p>
-      <div className="mt-2"><ChipList items={HOLIDAY_CAMPS.createGroups.items.slice(0, 6)} color="coral" /></div>
-      <div className="mt-4"><BookNowButton /></div>
-    </Panel>
+  holiday_camps: (onAsk) => (
+    <Frame
+      banner={<Banner img={IMAGES.parachute} label={HOLIDAY_CAMPS.campaignTitle} color="coral" Icon={Tent} />}
+      eyebrow="Holiday Camps" eyebrowColor="coral"
+      title="Camp days for ages 3.5–11"
+      desc={HOLIDAY_CAMPS.campaignBlurb}
+      footer={<BookNowButton />}
+    >
+      <div className="grid grid-cols-2 gap-3">
+        <AskCard title="Create Groups" subtitle="Ages 3.5–11" onAsk={onAsk} prompt="What do the Create groups do at holiday camp?" />
+        <AskCard title="Multi-Sports" subtitle="Ages 5–11" onAsk={onAsk} prompt="What sports are in the multi-sports groups?" />
+        <AskCard title="Locations" subtitle="Across Manchester" onAsk={onAsk} prompt="Where are your holiday camp locations?" />
+        <AskCard title="Pricing & hours" subtitle="Day rates" onAsk={onAsk} prompt="What are the holiday camp prices and hours?" />
+      </div>
+    </Frame>
   ),
 
   faqs_pricing: () => (
-    <Panel eyebrow="Pricing & FAQs" color="green" title="Day rates & essentials">
-      <div className="rounded-2xl bg-gradient-to-br from-sop-blue to-sop-purple p-5 text-white">
-        <p className="text-sm uppercase tracking-wide font-700 text-white/70 font-display">Per day (venue dependent)</p>
-        <p className="mt-1 font-display text-3xl font-800">£25.49–£30.49</p>
-        <p className="mt-1 text-sm text-white/85">Hours 09:00–17:00 · early 08:00 · late 18:00</p>
+    <Frame eyebrow="Pricing & FAQs" eyebrowColor="green" title="Day rates & essentials" footer={<BookNowButton />}>
+      <div className="grid h-full grid-rows-[auto_1fr] gap-3">
+        <div className="rounded-3xl bg-gradient-to-br from-sop-blue to-sop-purple p-5 text-white shadow-play">
+          <p className="font-display text-xs font-700 uppercase tracking-wide text-white/70">Per day (venue dependent)</p>
+          <p className="mt-1 font-display text-3xl font-800 sm:text-4xl">£25.49–£30.49</p>
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-white/85"><Clock className="h-4 w-4" /> 09:00–17:00 · early 08:00 · late 18:00</p>
+        </div>
+        <div className="grid grid-cols-2 gap-2.5">
+          {FAQS.slice(0, 4).map((f) => (
+            <div key={f.q} className="rounded-2xl bg-white/90 p-3 ring-1 ring-sop-border">
+              <p className="text-sm font-700 text-sop-ink">{f.q}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{f.a}</p>
+            </div>
+          ))}
+        </div>
       </div>
-      <ul className="mt-4 space-y-2">
-        {FAQS.slice(0, 4).map((f) => (
-          <li key={f.q} className="rounded-2xl bg-sop-mist/70 p-3">
-            <p className="font-700 text-sop-ink text-sm">{f.q}</p>
-            <p className="text-sm text-muted-foreground">{f.a}</p>
-          </li>
-        ))}
-      </ul>
-    </Panel>
+    </Frame>
   ),
 
   how_to_book: () => (
-    <Panel eyebrow="How to book" color="blue" title="Booking is simple">
-      <p className="text-muted-foreground">Create an account through iPal, add your child, and reserve a day. Card payments and childcare vouchers accepted.</p>
-      <div className="mt-4"><BookNowButton /></div>
-    </Panel>
-  ),
-
-  clubs_parents: () => (
-    <Panel eyebrow="Wraparound care" color="blue" title="Before & After School Clubs">
-      <p className="text-muted-foreground">{CLUBS_PARENTS.proposition}</p>
-      <p className="mt-3 text-sm font-700 text-sop-ink">Locations</p>
-      <div className="mt-2"><ChipList items={CLUBS_PARENTS.locations} color="purple" /></div>
-    </Panel>
-  ),
-
-  sports_classes: () => (
-    <Panel eyebrow="Sports" color="green" title="Sports Classes">
-      <p className="text-muted-foreground">Active sessions offered through our clubs and school provision.</p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <CTALink to="/parents/clubs" size="md" variant="ghost">Before & After Clubs</CTALink>
-        <CTALink to="/schools/extra-curricular" size="md" variant="ghost">Extra-Curricular Clubs</CTALink>
-      </div>
-    </Panel>
-  ),
-
-  schools_overview: () => (
-    <Panel eyebrow="For Schools" color="blue" title="Our school services">
-      <p className="text-muted-foreground">{SCHOOLS.coreMessage}</p>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        {SCHOOLS.services.map((s) => (
-          <div key={s.title} className="rounded-2xl bg-sop-blue/6 p-3 text-sm font-600 text-sop-ink ring-1 ring-sop-blue/12">{s.title}</div>
+    <Frame eyebrow="How to book" eyebrowColor="blue" title="Booking is simple"
+      desc="Create an account through iPal, add your child, and reserve a day. Card payments and childcare vouchers accepted."
+      footer={<BookNowButton size="lg" />}>
+      <div className="grid grid-cols-2 gap-2.5">
+        {["Use the iPal system", "Add a child", "Pay monthly or by card", "Use childcare vouchers"].map((s, i) => (
+          <div key={s} className="flex items-center gap-3 rounded-2xl bg-white/90 p-3.5 ring-1 ring-sop-border">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sop-blue text-white font-display font-700">{i + 1}</span>
+            <span className="text-sm font-600 text-sop-ink">{s}</span>
+          </div>
         ))}
       </div>
-    </Panel>
+    </Frame>
   ),
 
-  pe: () => (
-    <Panel eyebrow="PE & Sport" color="green" title="PE & Sports Provision">
-      <img src={IMAGES.peLesson} alt="PE lesson" className="mb-4 aspect-[16/9] w-full rounded-2xl object-cover" loading="lazy" />
-      <div className="grid grid-cols-3 gap-3">
-        {PE.pricing.map((p, i) => (
-          <PriceCard key={p.tier} tier={p.tier} price={p.price} color={["yellow", "blue", "green"][i]} />
+  clubs_parents: (onAsk) => (
+    <Frame banner={<Banner img={IMAGES.playground} label="Wraparound care" color="blue" Icon={Sunrise} />}
+      eyebrow="Parents" eyebrowColor="blue" title="Before & After School Clubs" desc={CLUBS_PARENTS.proposition}>
+      <div>
+        <p className="mb-2 text-sm font-700 text-sop-ink">Explore</p>
+        <AskChips items={["Locations", "Activities", "How to book"]} onAsk={onAsk}
+          promptFor={(x) => `Tell me about the ${x.toLowerCase()} for before and after school clubs`} />
+      </div>
+    </Frame>
+  ),
+
+  sports_classes: (onAsk) => (
+    <Frame eyebrow="Sports" eyebrowColor="green" title="Sports Classes"
+      desc="Active sessions offered through our clubs and school provision.">
+      <div className="grid grid-cols-2 gap-3">
+        <AskCard title="After-School Clubs" onAsk={onAsk} prompt="Tell me about before and after school clubs" />
+        <AskCard title="Extra-Curricular Clubs" onAsk={onAsk} prompt="Tell me about extra-curricular clubs for schools" />
+      </div>
+    </Frame>
+  ),
+
+  schools_overview: (onAsk) => (
+    <Frame banner={<Banner img={IMAGES.peLesson} label="For Schools" color="blue" Icon={Dumbbell} />}
+      eyebrow="For Schools" eyebrowColor="blue" title="Everything your school needs" desc={SCHOOLS.coreMessage}
+      footer={<button onClick={() => onAsk("I'd like to book a 15-minute school suitability call")} className="inline-flex items-center gap-2 rounded-full bg-sop-blue px-6 py-3 font-display font-700 text-white shadow-play transition hover:bg-sop-bluedeep">Book a suitability call <ArrowRight className="h-4 w-4" /></button>}>
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+        {SCHOOLS.services.slice(0, 6).map((s) => (
+          <AskCard key={s.title} title={s.title} onAsk={onAsk} prompt={`Tell me about ${s.title} for schools`} />
         ))}
       </div>
-    </Panel>
+    </Frame>
   ),
 
-  swim_ed: () => (
-    <Panel eyebrow="Swim:ED" color="blue" title="Making Waves in Primary Education">
-      <img src={IMAGES.swimGroup} alt="Children swimming" className="mb-4 aspect-[16/9] w-full rounded-2xl object-cover" loading="lazy" />
-      <p className="text-muted-foreground">{SWIM.proposition}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
+  pe: (onAsk) => (
+    <Frame banner={<Banner img={IMAGES.peLesson} label="PE & Sport" color="green" Icon={Dumbbell} />}
+      eyebrow="For Schools" eyebrowColor="green" title="PE & Sports Provision" desc={PE.coreMessage}
+      footer={<AskChips items={["Add-ons", "Lunchtime provision", "Register interest"]} onAsk={onAsk}
+        promptFor={(x) => `Tell me about ${x.toLowerCase()} for PE provision`} />}>
+      <div className="grid grid-cols-3 gap-2.5">
+        {PE.pricing.map((p) => (
+          <div key={p.tier} className="rounded-2xl bg-white/90 p-3 text-center ring-1 ring-sop-border">
+            <p className="font-display font-700 text-sop-ink">{p.tier}</p>
+            <p className="text-xs text-muted-foreground">{p.detail}</p>
+            <p className="mt-1 font-display text-lg font-800 text-sop-blue">{p.price}</p>
+          </div>
+        ))}
+      </div>
+    </Frame>
+  ),
+
+  swim_ed: (onAsk) => (
+    <Frame banner={<Banner img={IMAGES.swimGroup} label="Swim:ED" color="sky" Icon={Waves} />}
+      eyebrow="Swim:ED" eyebrowColor="sky" title="Making Waves in Primary Education" desc={SWIM.proposition}
+      footer={<AskChips items={["Benefits", "Features", "Pricing", "Register interest"]} onAsk={onAsk}
+        promptFor={(x) => `Tell me about Swim:ED ${x.toLowerCase()}`} />}>
+      <div className="flex flex-wrap gap-2">
         {SWIM.process.map((s, i) => (
           <span key={s} className="rounded-full bg-sop-sky/12 px-3 py-1.5 text-sm font-600 text-sop-blue">{i + 1}. {s}</span>
         ))}
       </div>
-    </Panel>
+    </Frame>
   ),
 
-  game_set_maths: () => (
-    <Panel eyebrow="Workshop" color="purple" title="Game, Set & MATHS">
-      <p className="text-muted-foreground">{GSM.proposition}</p>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {GSM.pricing.map((p, i) => (
-          <PriceCard key={p.label} tier={p.label} price={p.price} color={["yellow", "blue", "green", "purple"][i]} />
+  game_set_maths: (onAsk) => (
+    <Frame eyebrow="Workshop" eyebrowColor="purple" title="Game, Set & MATHS" desc={GSM.proposition}
+      footer={<button onClick={() => onAsk("I'd like to book a Game, Set & Maths workshop")} className="inline-flex items-center gap-2 rounded-full bg-sop-purple px-6 py-3 font-display font-700 text-white shadow-play">Book a workshop <ArrowRight className="h-4 w-4" /></button>}>
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        {GSM.pricing.map((p) => (
+          <div key={p.label} className="rounded-2xl bg-white/90 p-3 text-center ring-1 ring-sop-border">
+            <p className="text-xs font-600 text-muted-foreground">{p.label}</p>
+            <p className="mt-1 font-display text-lg font-800 text-sop-purple">{p.price}</p>
+          </div>
         ))}
       </div>
-    </Panel>
+    </Frame>
   ),
 
   extra_curricular: () => (
-    <Panel eyebrow="Clubs" color="coral" title="Extra-Curricular Clubs">
-      <p className="text-muted-foreground">{EXTRA_CURRICULAR.proposition}</p>
-      <div className="mt-3"><ChipList items={EXTRA_CURRICULAR.activities} color="coral" /></div>
-    </Panel>
+    <Frame banner={<Banner img={IMAGES.soccer} label="Clubs" color="coral" Icon={Star} />}
+      eyebrow="For Schools" eyebrowColor="coral" title="Extra-Curricular Clubs" desc={EXTRA_CURRICULAR.proposition}>
+      <div className="flex flex-wrap gap-2">
+        {EXTRA_CURRICULAR.activities.map((a) => (
+          <span key={a} className="rounded-full bg-sop-coral/8 px-3.5 py-2 text-sm font-600 text-sop-coral ring-1 ring-sop-coral/20">{a}</span>
+        ))}
+      </div>
+    </Frame>
   ),
 
   tournaments: () => (
-    <Panel eyebrow="Free to enter" color="green" title="Sports Tournaments">
-      <p className="text-muted-foreground">{TOURNAMENTS.proposition}</p>
-      <div className="mt-3"><TickList items={TOURNAMENTS.benefits.slice(0, 4)} color="green" className="sm:grid-cols-1" /></div>
-    </Panel>
+    <Frame banner={<Banner img={IMAGES.tournament} label="Free to enter" color="green" Icon={Trophy} />}
+      eyebrow="For Schools" eyebrowColor="green" title="Sports Tournaments" desc={TOURNAMENTS.proposition}>
+      <div className="grid grid-cols-2 gap-2.5">
+        {TOURNAMENTS.benefits.slice(0, 4).map((b) => (
+          <div key={b} className="rounded-2xl bg-white/90 p-3 text-sm font-600 text-sop-ink ring-1 ring-sop-border">{b}</div>
+        ))}
+      </div>
+    </Frame>
   ),
 
   clubs_schools: () => (
-    <Panel eyebrow="For Schools" color="blue" title="Wraparound care for your school">
-      <div className="mb-3"><TickList items={CLUBS_SCHOOLS.benefits.slice(0, 4)} color="blue" className="sm:grid-cols-1" /></div>
-      <ChipList items={CLUBS_SCHOOLS.activities} color="purple" />
-    </Panel>
+    <Frame eyebrow="For Schools" eyebrowColor="blue" title="Wraparound care, no workload" desc={CLUBS_SCHOOLS.positioning}>
+      <div className="grid grid-cols-2 gap-2.5">
+        {CLUBS_SCHOOLS.benefits.slice(0, 4).map((b) => (
+          <div key={b} className="rounded-2xl bg-white/90 p-3 text-sm font-600 text-sop-ink ring-1 ring-sop-border">{b}</div>
+        ))}
+      </div>
+    </Frame>
   ),
 
   venues: () => (
-    <Panel eyebrow="Where we run" color="purple" title="Holiday camp venues">
-      <ChipList items={HOME.venues} color="purple" />
-    </Panel>
+    <Frame eyebrow="Where we run" eyebrowColor="purple" title="Holiday camp venues">
+      <div className="flex flex-wrap gap-2">
+        {HOME.venues.map((v) => (
+          <span key={v} className="rounded-full bg-sop-purple/8 px-3.5 py-2 text-sm font-600 text-sop-purple ring-1 ring-sop-purple/20">{v}</span>
+        ))}
+      </div>
+    </Frame>
   ),
 
   why_us: () => (
-    <Panel eyebrow="Why choose us" color="purple" title="Purposeful play, real impact">
-      <p className="text-muted-foreground"><span className="font-700 text-sop-ink">Vision:</span> {WHY_US.vision}</p>
-      <div className="mt-3"><ChipList items={WHY_US.values} color="green" /></div>
-    </Panel>
+    <Frame eyebrow="Why choose us" eyebrowColor="purple" title="Purposeful play, real impact"
+      desc={WHY_US.vision}>
+      <div className="flex flex-wrap gap-2">
+        {WHY_US.values.map((v) => (
+          <span key={v} className="rounded-full bg-sop-green/10 px-3.5 py-2 text-sm font-600 text-sop-green ring-1 ring-sop-green/20">{v}</span>
+        ))}
+      </div>
+    </Frame>
   ),
 
   team: () => (
-    <Panel eyebrow="Our people" color="coral" title="Meet the Team">
-      <div className="grid gap-2 sm:grid-cols-2">
+    <Frame eyebrow="Our people" eyebrowColor="coral" title="Meet the Team">
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         {TEAM.leadership.slice(0, 6).map((p) => (
-          <div key={p.name} className="rounded-2xl bg-sop-mist/70 p-3">
-            <p className="font-700 text-sop-ink text-sm">{p.name}</p>
+          <div key={p.name} className="rounded-2xl bg-white/90 p-3 ring-1 ring-sop-border">
+            <p className="text-sm font-700 text-sop-ink">{p.name}</p>
             <p className="text-xs text-sop-blue">{p.role}</p>
           </div>
         ))}
       </div>
-    </Panel>
+    </Frame>
   ),
 
   contact: () => (
-    <Panel eyebrow="Get in touch" color="blue" title="Talk to the team">
-      <ul className="space-y-2 text-sm">
-        <li className="flex items-center gap-2 text-sop-ink"><Phone className="h-4 w-4 text-sop-blue" /> <a href={CONTACT.phoneHref} className="font-600">{CONTACT.phone}</a></li>
-        <li className="flex items-center gap-2 text-sop-ink"><Mail className="h-4 w-4 text-sop-coral" /> <a href={CONTACT.emailHref} className="font-600">{CONTACT.email}</a></li>
-        <li className="flex items-start gap-2 text-sop-ink"><MapPin className="mt-0.5 h-4 w-4 text-sop-green" /> {CONTACT.address}</li>
-      </ul>
-      <p className="mt-3 text-sm text-muted-foreground">You can share your name, email and enquiry with me and I'll pass it straight to the team.</p>
-    </Panel>
+    <Frame eyebrow="Get in touch" eyebrowColor="blue" title="Talk to the team"
+      desc="Share your name, email and enquiry in the chat and I'll pass it straight to the team.">
+      <div className="grid gap-2.5">
+        <a href={CONTACT.phoneHref} className="flex items-center gap-3 rounded-2xl bg-white/90 p-3.5 ring-1 ring-sop-border"><span className="grid h-10 w-10 place-items-center rounded-xl bg-sop-blue/10 text-sop-blue"><Phone className="h-5 w-5" /></span><span className="font-display font-700 text-sop-ink">{CONTACT.phone}</span></a>
+        <a href={CONTACT.emailHref} className="flex items-center gap-3 rounded-2xl bg-white/90 p-3.5 ring-1 ring-sop-border"><span className="grid h-10 w-10 place-items-center rounded-xl bg-sop-coral/12 text-sop-coral"><Mail className="h-5 w-5" /></span><span className="font-display font-700 text-sop-ink">{CONTACT.email}</span></a>
+        <div className="flex items-center gap-3 rounded-2xl bg-white/90 p-3.5 ring-1 ring-sop-border"><span className="grid h-10 w-10 place-items-center rounded-xl bg-sop-green/12 text-sop-green"><MapPin className="h-5 w-5" /></span><span className="text-sm font-600 text-sop-ink">{CONTACT.address}</span></div>
+      </div>
+    </Frame>
   ),
 
   booking: () => (
-    <Panel eyebrow="Book now" color="coral" title="Reserve a place">
-      <p className="text-muted-foreground">Bookings are handled securely through our iPal portal.</p>
-      <div className="mt-4"><BookNowButton size="lg" /></div>
-    </Panel>
+    <Frame eyebrow="Book now" eyebrowColor="coral" title="Reserve a place"
+      desc="Bookings are handled securely through our iPal portal." footer={<BookNowButton size="lg" />}>
+      <div className="grid h-full place-items-center">
+        <Palette className="h-20 w-20 text-sop-coral/30" />
+      </div>
+    </Frame>
   ),
 };
 
-export default function DynamicCanvas({ panels = [] }) {
-  const list = panels && panels.length ? panels : ["welcome"];
-  return (
-    <div className="space-y-5">
-      {list.map((key) => {
-        const Comp = PANELS[key];
-        return Comp ? <div key={key}>{<Comp />}</div> : null;
-      })}
-      {!panels.length && (
-        <div className="flex items-center gap-2 rounded-2xl bg-white/70 p-4 text-sm text-muted-foreground ring-1 ring-sop-border">
-          <Sparkles className="h-4 w-4 text-sop-yellow" /> Ask a question on the left and I'll show the details here.
-        </div>
-      )}
-    </div>
-  );
+export default function DynamicCanvas({ view = "welcome", onAsk }) {
+  const render = VIEWS[view] || VIEWS.welcome;
+  return <div className="h-full">{render(onAsk)}</div>;
 }

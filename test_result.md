@@ -124,6 +124,17 @@ backend:
         -comment: "Comprehensive backend testing completed - ALL 8 TESTS PASSED. Created backend_test.py with full test coverage. Results: (1) GET /api/ health check returns correct message and status. (2) POST /api/enquiries with full payload (all fields) returns 200 with valid UUID id, ISO created_at, all fields echoed, no _id leakage. (3) POST /api/enquiries with minimal payload (only required fields) returns 200 with defaults applied (mailing_list=false). (4-6) Validation correctly rejects missing required fields (full_name, email, enquiry) with 422. (7) Validation correctly rejects invalid email format with 422. (8) GET /api/enquiries returns list of enquiries, newest first, all with valid UUID ids, created_at timestamps, no _id leakage, and all created enquiries present. Backend API is fully functional and production-ready."
 
 frontend:
+  - task: "Play Assistant dynamic AI website (/explore) + mode toggle"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/sop/Explore.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Careplus-style DUAL-MODE layout implemented. Shared header carries a centered STATIC | DYNAMIC segmented toggle (3-zone flex, no overlap). DYNAMIC (/explore) = large left live-content canvas (welcome hero + 'Try asking' chips, then AI-driven panels) + persistent right AI chat sidebar ('School of Play AI · Always on · Claude Sonnet 4.6', home/reset icons). Verified via screenshots in both modes (welcome, live Swim:ED panel + grounded pricing, audience badge, suggestion chips). Awaiting user permission for automated frontend testing."
   - task: "School of Play website (design system, pages, particle interaction)"
     implemented: true
     working: "NA"
@@ -134,17 +145,32 @@ frontend:
     status_history:
         -working: "NA"
         -agent: "main"
-        -comment: "New design system + 16 pages built. Not yet tested by agent — awaiting user permission before frontend testing per protocol."
+        -comment: "New design system + 16 pages built. Home verified by screenshot. Awaiting user permission before automated frontend testing."
+
+backend:
+  - task: "Play Assistant AI chat API (/api/assistant/chat) with Claude + lead capture"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "New POST /api/assistant/chat using emergentintegrations LlmChat + claude-sonnet-4-6 via EMERGENT_LLM_KEY (server-side only). Multi-turn via session_id (history stored in db.chat_messages and replayed in system prompt). System prompt strictly grounded on School of Play content inventory. Returns JSON {session_id, reply, audience(parent|school|unknown), panels[valid keys], suggestions[], lead_submitted}. When the model marks lead ready_to_submit with valid full_name+email+enquiry, backend auto-inserts into db.enquiries with source='ai_assistant'. Also GET /api/assistant/history/{session_id}. Verified working via manual curl + UI (grounded reply, correct pricing, panels, audience). Needs agent testing: (1) basic chat returns reply+panels+session_id; (2) multi-turn context retained across calls with same session_id; (3) grounding — asking something outside inventory does not fabricate and points to contact/phone; (4) lead capture flow across turns eventually writes an enquiry with source='ai_assistant' (check GET /api/enquiries); (5) empty message -> 422."
+        -working: true
+        -agent: "testing"
+        -comment: "Comprehensive Play Assistant AI chat testing completed - ALL 5 TESTS PASSED (13/13 total including enquiry API). Test A (Basic Chat): POST /api/assistant/chat with parent enquiry about holiday camps returned 200 with non-empty reply (505 chars), correctly identified audience='parent', returned valid panels ['holiday_camps', 'venues', 'faqs_pricing'], 4 suggestion chips, and lead_submitted=false. Test B (Multi-turn Memory): Using session_id='t-multi', first message about Swim:ED interest received appropriate reply with pricing (£11,104 / £258). Second message 'How much does it cost?' correctly referenced Swim:ED pricing from context, proving conversation memory is retained. GET /api/assistant/history/t-multi returned 4 messages (2 user + 2 assistant) in chronological order. Test C (Grounding): Asked about London/Birmingham venues (not in knowledge base). Assistant correctly responded that camps are only in Greater Manchester, did NOT fabricate pricing or venues, and appropriately indicated those areas aren't covered. No hallucination detected. Test D (Lead Capture): 3-turn conversation collected name='Test Head', email='testhead@example.com', school='Sunnydale Primary in Manchester', enquiry about PE provision. lead_submitted flag became true on turn 3. GET /api/enquiries confirmed enquiry was stored with source='ai_assistant', audience='School', service='PE', school_name_location='Sunnydale Primary, Manchester', and correct contact details. Test E (Validation): Empty message correctly rejected with 422 'Empty message'. Claude responses averaged 5-7 seconds (well within 20s limit). All endpoints working perfectly with proper grounding, context retention, and lead capture."
 
 metadata:
   created_by: "main_agent"
-  version: "2.0"
-  test_sequence: 1
+  version: "2.1"
+  test_sequence: 2
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Enquiry submission + storage API (/api/enquiries POST & GET)"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -156,3 +182,7 @@ agent_communication:
     -message: "8/8 backend tests passed. GET /api/ health OK; POST /api/enquiries full + minimal submissions OK with UUID id and ISO created_at, no _id leakage; 422 on missing full_name/email/enquiry and invalid email; GET /api/enquiries returns newest-first list. Backend production-ready."
     -agent: "testing"
     -message: "Backend testing complete - ALL TESTS PASSED (8/8). The enquiry API is fully functional: health check works, POST creates enquiries with proper UUID ids and validation, GET lists enquiries correctly ordered newest-first with no MongoDB _id leakage. No issues found. Backend is production-ready."
+    -agent: "main"
+    -message: "Added Play Assistant AI chat API with Claude integration. Please test: (1) basic chat, (2) multi-turn memory, (3) grounding (no hallucination), (4) lead capture end-to-end, (5) empty message validation. Use generous timeouts (30-40s) as Claude responses can take up to 20s."
+    -agent: "testing"
+    -message: "Play Assistant AI chat testing complete - ALL 5 TESTS PASSED (13/13 total). Basic chat works with proper reply/audience/panels/suggestions. Multi-turn memory correctly retains Swim:ED context across turns. Grounding test passed - no hallucination when asked about London/Birmingham (correctly stated only Greater Manchester). Lead capture works end-to-end: collected name/email/school details over 3 turns, lead_submitted flag became true, enquiry stored in database with source='ai_assistant' and correct details. Empty message validation returns 422. Claude responses averaged 5-7s. All backend APIs are production-ready with no issues found."

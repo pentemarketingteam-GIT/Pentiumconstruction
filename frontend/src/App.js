@@ -22,6 +22,7 @@ import ClubsSchools from "@/pages/sop/ClubsSchools";
 import About from "@/pages/sop/About";
 import Team from "@/pages/sop/Team";
 import Contact from "@/pages/sop/Contact";
+import Explore from "@/pages/sop/Explore";
 
 function App() {
   return (
@@ -29,6 +30,9 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-center" richColors />
         <Routes>
+          {/* Dynamic AI-interactive website (full screen) */}
+          <Route path="/explore" element={<Explore />} />
+
           <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
 

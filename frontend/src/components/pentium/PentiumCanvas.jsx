@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   ArrowRight, MapPin, ShieldCheck, Building2, Home as HomeIcon, Hammer,
   Leaf, HeartHandshake, Phone, Mail, MessageCircle, CalendarCheck, Check,
-  Award, Layers, ChevronRight, Ruler, Calendar, Info, HelpCircle,
+  Award, Layers, ChevronRight, Ruler, Calendar, Info, HelpCircle, ExternalLink, Navigation,
 } from "lucide-react";
 import {
   BRAND, PROJECTS, SERVICES, DIFFERENTIATORS, QUALITY_STAGES,
@@ -82,10 +82,14 @@ function ProjectDetail({ project, onAsk }) {
   const tabs = ["Overview"];
   if (project.amenities) tabs.push("Amenities");
   if (project.specs) tabs.push("Specifications");
-  if (project.blueprintTabs) tabs.push("Blueprints");
+  if (project.blueprints) tabs.push("Blueprints");
   if (project.gallery && project.gallery.length) tabs.push("Gallery");
+  tabs.push("Location");
   const [tab, setTab] = useState("Overview");
   const [gImg, setGImg] = useState(0);
+  const [bpIdx, setBpIdx] = useState(0);
+  const liveUrl = `https://www.pentiumconstructions.in/projects/${project.slug}`;
+  const mapQuery = `Pentium ${project.name} ${project.location}`;
 
   return (
     <div className="flex h-full flex-col">
@@ -159,15 +163,37 @@ function ProjectDetail({ project, onAsk }) {
 
         {tab === "Blueprints" && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid gap-3">
-            <div className="overflow-hidden rounded-2xl p-3" style={{ border: "1px solid var(--pen-border)", background: "var(--pen-surface)" }}>
-              <SmartImg src={project.blueprint} alt="Layout blueprint" className="mx-auto max-h-56 w-auto object-contain" />
-            </div>
             <div className="flex flex-wrap gap-1.5">
-              {project.blueprintTabs.map((t) => (
-                <span key={t} className="rounded-full px-3 py-1.5 text-xs font-semibold" style={{ border: "1px solid var(--pen-border)", color: "var(--pen-fg-2)" }}>{t}</span>
+              {project.blueprints.map((b, i) => (
+                <button key={b.label} onClick={() => setBpIdx(i)} className="rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                  style={i === bpIdx ? { background: "linear-gradient(135deg, var(--pen-gold), var(--pen-gold-deep))", color: "#fff" } : { border: "1px solid var(--pen-border)", color: "var(--pen-fg-2)" }}>
+                  {b.label}
+                </button>
               ))}
             </div>
-            <p className="text-xs" style={{ color: "var(--pen-fg-3)" }}>Full layout set available on request — our sales team can share every floor plan.</p>
+            {project.blueprints[bpIdx].url ? (
+              <div className="overflow-hidden rounded-2xl p-3" style={{ border: "1px solid var(--pen-border)", background: "#ffffff" }}>
+                <SmartImg src={project.blueprints[bpIdx].url} alt={`${project.blueprints[bpIdx].label} blueprint`} className="mx-auto max-h-64 w-auto object-contain" />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3 rounded-2xl p-8 text-center" style={{ border: "1px dashed var(--pen-border)", background: "var(--pen-surface)" }}>
+                <Layers className="h-8 w-8" style={{ color: "var(--pen-gold-2)" }} />
+                <p className="text-sm" style={{ color: "var(--pen-fg-2)" }}>Open the <strong>{project.blueprints[bpIdx].label}</strong> layout for {project.name}.</p>
+                <a href={`${liveUrl}#floor-plans`} target="_blank" rel="noreferrer" className="pen-btn-gold text-sm">View blueprint <ExternalLink className="h-4 w-4" /></a>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {tab === "Location" && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid gap-2.5">
+            <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid var(--pen-border)" }}>
+              <iframe title={`${project.name} location`} src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=14&output=embed`} className="h-56 w-full" style={{ border: 0 }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+            </div>
+            <div className="flex items-center gap-2 text-sm" style={{ color: "var(--pen-fg-2)" }}>
+              <MapPin className="h-4 w-4" style={{ color: "var(--pen-gold-2)" }} /> {project.location}
+            </div>
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`} target="_blank" rel="noreferrer" className="pen-btn-ghost justify-center text-sm"><Navigation className="h-4 w-4" /> Get directions</a>
           </motion.div>
         )}
 

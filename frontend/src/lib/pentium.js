@@ -87,8 +87,11 @@ export const PROJECTS = [
       AR("Waste Disposal", "Sewage treatment plant per pollution-control norms; biogas plant for waste disposal."),
       AR("Finance", "Approved by major financial institutions for easy long-term loans."),
     ],
-    blueprintTabs: ["Basement", "Ground", "First", "Typical", "Type A", "Type B", "Type C", "Type D"],
-    blueprint: g("floor/04-08-26-12-07-HH-BASEMENT-FLOOR.webp"),
+    blueprints: [
+      { label: "Basement", url: g("floor/04-08-26-12-07-HH-BASEMENT-FLOOR.webp") },
+      { label: "Ground" }, { label: "First" }, { label: "Typical" },
+      { label: "Type A" }, { label: "Type B" }, { label: "Type C" }, { label: "Type D" },
+    ],
     gallery: [
       g("project/06-08-26-06-32-Harmony-Heights.jpg"),
       g("project_gallery/04-08-26-11-57-hh-glry-img-new11.webp"),
@@ -145,8 +148,11 @@ export const PROJECTS = [
       AR("Car Parking", "Ample car parking at ground floor."),
       AR("Finance", "Approved by major banks for easy long-term loans."),
     ],
-    blueprintTabs: ["Ground", "Type A", "Type B", "Type C", "Type D", "Type E", "Type F", "Type G", "Typical"],
-    blueprint: g("floor/04-08-26-03-31-ground.webp"),
+    blueprints: [
+      { label: "Ground", url: g("floor/04-08-26-03-31-ground.webp") },
+      { label: "Type A" }, { label: "Type B" }, { label: "Type C" }, { label: "Type D" },
+      { label: "Type E" }, { label: "Type F" }, { label: "Type G" }, { label: "Typical" },
+    ],
     gallery: [g("project/06-08-26-05-14-Tranquil-Vertical-Home.jpg")],
   },
   {

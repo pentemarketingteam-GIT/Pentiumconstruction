@@ -84,95 +84,72 @@ async def list_enquiries():
 VALID_PANELS = [
     "welcome", "projects", "project_eternia", "project_tranquil",
     "project_harmony", "project_spring_green", "project_palm_grove",
-    "project_civil_park", "project_aishwarya", "services", "why_pentium",
-    "quality_process", "go_green", "csr", "about", "contact", "book_visit",
+    "project_civil_avenue", "project_vrindavan", "project_dream_city",
+    "project_aishwarya", "services", "why_pentium", "quality_process",
+    "go_green", "csr", "about", "faqs", "contact", "book_visit",
 ]
 
 # Knowledge base — drawn ONLY from Pentium Constructions' own website content.
 KNOWLEDGE_BASE = """
 PENTIUM CONSTRUCTIONS — KNOWLEDGE BASE (the ONLY source of truth; never invent beyond this)
 
-ABOUT (panel "about"): Pentium Construction Pvt. Ltd. is a premium residential developer headquartered in
-Calicut (Kozhikode), Kerala, since 1994 — 30+ years of building. Positions itself as a leading Kerala builder
-specialising in premium apartments and villas across Calicut and Perinthalmanna (Malappuram), with developments
-across Malappuram, Wayanad and beyond. Guiding principle: "Quality in everything we do."
-Tagline: Responsible Building. Unmatched Craft. / Premium Living, Kerala.
-Leadership: Mr. V. Gopinathan (Chairman & Managing Director); Mr. V. Sethu Madhavan (Director).
-Stats: 2000+ Happy Clients; 23+ Completed/Landmark Projects; 3 Ongoing Projects; Established 1994.
-Ethos: contemporary design blended with Kerala living traditions (passive ventilation, teakwood craftsmanship);
-ethics and integrity with no shortcuts; customers welcomed into the "Pentium Family."
+ABOUT (panel "about"): Pentium Construction Pvt. Ltd., a premium residential developer headquartered in Calicut
+(Kozhikode), Kerala since 1994 (30+ years). Premium apartments and villas across Calicut and Perinthalmanna
+(Malappuram), with developments across Malappuram, Wayanad and beyond. Guiding principle: "Quality in everything
+we do." Tagline: Responsible Building. Unmatched Craft. Leadership: Mr. V. Gopinathan (Chairman & MD),
+Mr. V. Sethu Madhavan (Director). Stats: 2000+ happy clients; 23+ completed projects; 3 ongoing; est. 1994.
 
-WHY PENTIUM (panel "why_pentium"): Choosing a construction partner matters most years after handover.
-What matters: experienced teams across many projects; genuine end-to-end project management; uncompromising
-quality; honest communication (including about problems); on-time track record; budget-sensible solutions;
-modern construction methods; non-negotiable safety; sustainable practices where they add value; support that
-continues after signing. Pillars of Excellence: Advanced Facilities (modern technology & infrastructure);
-World-Class Amenities (swimming pools, gyms, clubhouses, landscaped gardens); Spacious Rooms (airy, generously
-sized apartments and villas).
+WHY PENTIUM (panel "why_pentium"): experienced teams; genuine end-to-end project management; uncompromising
+quality; honest communication; on-time delivery; budget-sensible solutions; modern methods; non-negotiable
+safety; sustainable practice; after-handover support. Pillars: Advanced Facilities; World-Class Amenities
+(pools, gyms, clubhouses, gardens); Spacious Rooms. Differentiators: IS 800 precision engineering; passive
+ventilation & climate-resilient layouts; teakwood & granite palette; RERA-certified transparent documentation;
+on-time delivery.
 
-KEY DIFFERENTIATORS: Precision engineering to IS 800 standards; passive ventilation & climate-resilient layouts;
-premium teakwood & granite finish palette chosen for coastal durability; RERA-certified, fully transparent
-documentation; on-time delivery.
+ONGOING PROJECTS
+1) HARMONY HEIGHTS (panel "project_harmony") — Perinthalmanna, Malappuram. Luxury Apartments, 2 & 3 BHK,
+   18 floors, 60 apartments. Area 1,494–2,133 sq ft. Land 2,396.50 sq m. RERA K-RERA/PRJ/MPM/232/2024.
+   Website status: Ongoing ~45% complete; construction started 1 Jan 2025, expected completion 31 Dec 2028.
+   44 amenities (incl. swimming pool, rooftop yoga/meditation, AC indoor games, co-working space, EV charging,
+   3 high-speed lifts, generator backup, solar, STP, biogas). Full technical specs published (flooring, kitchen,
+   toilet, electrical, doors/windows, painting, elevators, generators, water, parking, security, fire safety,
+   waste, finance). Blueprints: Basement, Ground, First, Typical, Type A–D.
+2) TRANQUIL VERTICAL HOME (panel "project_tranquil") — Nellikavu, Eranhipalam, Calicut. Luxury Apartments,
+   2 & 3 BHK, Ground + 4 floors, 28 homes. Area 1,314–1,863 sq ft. RERA K-RERA/PRJ/KKD/063/2021.
+   Website status: Ongoing — nearing completion (exact % not published). 18 amenities. Full technical specs
+   published. Blueprints: Ground, Type A–G, Typical.
+3) SPRING GREEN VILLAS (panel "project_spring_green") — Perinthalmanna, Malappuram. Luxury Villas, 3, 4 & 5 BHK,
+   37 units. Area 1,296–2,604 sq ft. RERA K-RERA/PRJ/MPM/172/2021. 20 amenities (gated community, basement
+   multi-level parking, pool, shuttle court, AC indoor games, billiards, etc.). NOTE: detailed technical specs
+   and blueprint set are NOT published on the site — say "available on request" and route to sales.
 
-PROJECTS (panel "projects" for the list; use the specific project panel when a single project is discussed).
-NOTE: Details beyond location/type/status are limited on the public site — never invent prices, availability,
-exact unit counts, floor plans or launch dates that are not listed here. Point buyers to the enquiry form or
-phone for specifics.
-- PENTIUM HARMONY HEIGHTS (panel "project_harmony") — Apartments. Status: ONGOING, ~45% complete, RERA Certified.
-- PENTIUM ETERNIA VERTICAL HOMES (panel "project_eternia") — Karaparamba, near Eranhipalam, Calicut.
-  2 & 3 BHK high-rise apartments. Status: Delivered.
-- PENTIUM TRANQUIL VERTICAL HOME (panel "project_tranquil") — Nellikavu, near Eranhipalam, Calicut.
-  2 & 3 BHK apartments (28 units, G+4). Status: Completed / Ready to move.
-- PENTIUM SPRING GREEN VILLAS (panel "project_spring_green") — Perinthalmanna, Malappuram.
-  3, 4 & 5 BHK villas. Status: Delivered.
-- PENTIUM PALM GROVE (panel "project_palm_grove") — Padippura, Malappuram. 2 BHK apartments. Status: Ready to move.
-- PENTIUM CIVIL PARK (panel "project_civil_park") — Parammal, Calicut. 3 BHK apartments. Status: Ready to move.
-- PENTIUM AISHWARYA (panel "project_aishwarya") — Status: Ready to move. (Other details not published.)
+COMPLETED PROJECTS (panels): ETERNIA VERTICAL HOMES (project_eternia) — Karaparamba, Calicut, 2 & 3 BHK,
+14 floors, 52 units, RERA K-RERA/PRJ/259/2020. PALM GROVE (project_palm_grove) — Perinthalmanna, Malappuram,
+luxury apartments. AISHWARYA (project_aishwarya) — Calicut, luxury apartments. VRINDAVAN (project_vrindavan) —
+Eranhipalam, Calicut. CIVIL AVENUE (project_civil_avenue) — Calicut. DREAM CITY (project_dream_city) — Calicut.
+For completed projects beyond type/location/RERA, other details are "available on request".
 
-SERVICES (panel "services"): "Construction Solutions, Start to Finish" — residential, commercial, institutional
-and industrial work delivered as one seamless process (no juggling multiple contractors). Services:
-1) Residential Construction (custom homes, villas, apartments); 2) Commercial Construction (offices, retail,
-mixed-use); 3) Industrial Construction (factories, warehouses, manufacturing); 4) Turnkey Projects (concept,
-design, construction, handover by one team); 5) Renovation & Remodeling (structural upgrades, interiors,
-restoration); 6) Project Management (scheduling, budgeting, quality oversight, site supervision);
-7) Interior & Finishing Works (flooring, painting, electrical, plumbing, finishing).
+SERVICES (panel "services"): Residential, Commercial, Industrial, Turnkey, Renovation & Remodeling, Project
+Management, Interior & Finishing — delivered as one seamless process.
 
-QUALITY PROCESS (panel "quality_process"): "Getting It Right at Every Stage." Quality is built in, not just
-checked at the end. Five stages: 1) Planning (scope review, design validation, resource planning, early risk
-ID); 2) Procurement (approved vendors, on-site material inspection, certified materials); 3) Construction
-(skilled crews, active supervision, process checks, safety compliance); 4) Inspection (structural & finishing
-checks + final client walkthrough); 5) Handover (final quality review, documentation, completion report,
-satisfaction check).
+QUALITY PROCESS (panel "quality_process"): Planning, Procurement, Construction, Inspection, Handover.
+GO GREEN (panel "go_green"): energy-efficient design, water conservation, waste management, eco materials,
+lower carbon footprint, green landscaping.
+CSR (panel "csr"): education, community development, health outreach, environment, volunteering, disaster relief,
+skill development.
 
-RESPONSIBLE BUILDER: "Building with Integrity" — transparency on timelines, safe sites, statutory/regulatory
-compliance, respect for clients, suppliers and workers; client needs at the centre.
+FAQs (panel "faqs"): handles residential/commercial/industrial/institutional/turnkey; in-house architects &
+engineers; multi-stage inspections; on-time delivery via planning & tracking; sustainability built in; quotes via
+consultation; renovation undertaken; differentiator = straightforward communication & consistent quality.
 
-GO GREEN (panel "go_green"): "Building Responsibly, Not Just Efficiently." Energy-efficient design; water
-conservation; responsible construction-waste management; eco-friendly materials; sustainability-minded site
-operations; lower carbon footprint; efficient resource use; green landscaping.
+CONTACT (panel "contact"): replies within 24 hours on business days. Primary +91 9544 141 000
+(WhatsApp wa.me/919544141000); UAE +971 56 724 1497; Admin office 0495-2768946; sales@pentiumconstructions.in;
+admin@pentiumconstructions.in. Offices: Admin — 2nd Floor, Mananchira Tower, A.G. Road, Kozhikode;
+Branch — 1st Floor, Lucia Tower, Bypass Jn., Perinthalmanna 679322; Regd. — Vyalikaval, Bangalore 560003.
+Home-loan assistance available; projects approved by major banks/financial institutions for long-term loans.
 
-CSR (panel "csr"): "Building Communities, Not Just Structures." Focus areas: education support; community
-development; health & wellness outreach; environmental conservation; employee-led volunteering; disaster relief;
-skill development & youth programmes.
-
-CONTACT (panel "contact"): Response to enquiries within 24 hours on business days.
-Primary Mobile: +91 9544 141 000 (WhatsApp: wa.me/919544141000). UAE Mobile: +971 56 724 1497.
-Admin Office Phone: 0495 - 2768946. Sales Email: sales@pentiumconstructions.in. Admin Email:
-admin@pentiumconstructions.in.
-Admin Office: 2nd Floor, Mananchira Tower, A.G. Road, Kozhikode, Kerala.
-Branch Office: 1st Floor, Lucia Tower 19/455 (2), Bypass Jn., Perinthalmanna - 679 322.
-Regd. Office: No. 84/44, 2nd Floor, 2nd Main Road, Vinayaka Circle, Vyalikaval, Bangalore - 560003.
-
-BOOKING / SITE VISIT (panel "book_visit"): There is no online booking portal — a site visit or consultation is
-arranged by the Pentium team. Collect the visitor's details (name, phone, project of interest) via the enquiry
-form / chat, or ask them to call +91 9544 141 000.
-
-FAQ HIGHLIGHTS: Handles residential, commercial, industrial, institutional & turnkey work. In-house architects
-& engineers for planning, design and estimates. Multi-stage inspections and experienced supervisors ensure
-durability. Upfront planning and progress tracking support on-time delivery. Sustainability is built in.
-For a quote: contact via form, email or phone for a consultation and tailored quotation. Renovation & remodelling
-undertaken. What sets Pentium apart: straightforward communication, consistent quality, every project treated as
-important.
+BOOKING / SITE VISIT (panel "book_visit"): no online booking portal — a site visit/consultation is arranged by
+the team. Collect name, phone and project of interest via chat or the enquiry form, or ask them to call/WhatsApp.
 """.strip()
 
 SYSTEM_RULES = """
@@ -187,8 +164,12 @@ STRICT GROUNDING:
   "contact" or "book_visit") or phone +91 9544 141 000 / WhatsApp. Do NOT guess.
 - You cannot book or reserve anything directly; a site visit/consultation is arranged by the team.
 
-STYLE: warm, premium, trustworthy and concise (2–5 short sentences). Indian English. No markdown headings, no
-bullet symbols in the reply text.
+STYLE: warm, premium and trustworthy. Keep replies ULTRA SHORT — 1 to 2 plain sentences in simple, 7th-grade
+Indian English. NEVER put long lists, specifications, amenities or tables in the chat text: the LEFT canvas
+carries ALL the detail. If the user asks to "list", "show all", "full details", amenities, specs or blueprints,
+reply briefly (for example: "Sure — I've put the full details on the left for you.") and select the matching
+panel. When a value is not published (e.g. price, exact availability, or Spring Green specs/blueprints), say it's
+"available on request" and offer to connect them with sales. No markdown, no bullet symbols in the reply.
 
 LEAD CAPTURE: when the visitor wants to enquire, book a site visit, request a call-back, or get a quote/brochure,
 collect their Name, Phone, and a short Message over the conversation (Email and Project of Interest are helpful
@@ -211,12 +192,15 @@ OUTPUT FORMAT — respond with ONE valid JSON object ONLY (no prose outside it, 
   }
 }
 VALID panel keys: """ + ", ".join(VALID_PANELS) + """.
-Always choose the MOST SPECIFIC panel that matches the question so the visual panel changes with every reply:
-- A single named project -> its own panel (e.g. Eternia -> project_eternia, Spring Green -> project_spring_green).
-- Browsing/comparing multiple homes or "show me projects" -> projects.
-- Company story/history/leadership -> about; why choose Pentium/quality of partner -> why_pentium.
-- Construction services offered -> services; quality steps/process -> quality_process; sustainability -> go_green;
-  community/csr -> csr; phone/address/email -> contact; site visit/consultation/enquire -> book_visit.
+Always choose the MOST SPECIFIC panel so the canvas changes with every reply:
+- A single named project -> its own panel (Harmony Heights -> project_harmony, Tranquil -> project_tranquil,
+  Spring Green -> project_spring_green, Eternia -> project_eternia, Palm Grove -> project_palm_grove,
+  Aishwarya -> project_aishwarya, Vrindavan -> project_vrindavan, Civil Avenue -> project_civil_avenue,
+  Dream City -> project_dream_city). Amenities/specs/blueprints of a project still use that project's panel.
+- Browsing/comparing homes or "show me projects" -> projects.
+- Company story/history/leadership -> about; why choose Pentium -> why_pentium; common questions -> faqs;
+  services -> services; quality steps -> quality_process; sustainability -> go_green; community -> csr;
+  phone/address/email/offices -> contact; site visit/consultation/enquire/call-back -> book_visit.
 Return the single best panel. Never repeat a generic panel when a specific one fits.
 """.strip()
 

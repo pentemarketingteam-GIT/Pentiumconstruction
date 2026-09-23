@@ -7,6 +7,8 @@ import { Send, Sparkles, Loader2, Bot, User, RotateCcw, ArrowLeft } from "lucide
 import { Link } from "react-router-dom";
 import Particles from "@/components/pentium/Particles";
 import PentiumCanvas from "@/components/pentium/PentiumCanvas";
+import ThemeToggle from "@/components/pentium/ThemeToggle";
+import { PentiumThemeProvider } from "@/lib/PentiumTheme";
 import { BRAND } from "@/lib/pentium";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
@@ -122,6 +124,7 @@ export default function Advisor() {
   };
 
   return (
+    <PentiumThemeProvider>
     <div className="flex h-screen flex-col overflow-hidden" style={{ background: "var(--pen-bg)" }}>
       <header className="flex h-[68px] shrink-0 items-center justify-between px-5 sm:px-8" style={{ background: "var(--pen-bg-top)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--pen-border)" }}>
         <Link to="/" className="flex items-center gap-2.5">
@@ -130,6 +133,7 @@ export default function Advisor() {
         </Link>
         <div className="flex items-center gap-2">
           <a href={BRAND.phoneHref} className="hidden text-sm sm:inline" style={{ color: "var(--pen-fg-2)" }}>{BRAND.phone}</a>
+          <ThemeToggle />
           <Link to="/" className="pen-btn-ghost text-sm"><ArrowLeft className="h-4 w-4" /> Home</Link>
         </div>
       </header>
@@ -199,5 +203,6 @@ export default function Advisor() {
         </aside>
       </div>
     </div>
+    </PentiumThemeProvider>
   );
 }

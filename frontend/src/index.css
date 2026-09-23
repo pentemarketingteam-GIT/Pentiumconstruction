@@ -127,7 +127,28 @@ html { scroll-behavior: smooth; }
 /* ============================================================
    PENTIUM CONSTRUCTIONS — premium dark / gold theme tokens
    ============================================================ */
-:root {
+/* Light mode (default) — warm ivory, charcoal text, gold + deep green accents */
+:root, [data-pen-theme="light"] {
+  --pen-bg: #f6f1e6;
+  --pen-bg-2: #fffdf8;
+  --pen-bg-top: rgba(246, 241, 230, 0.82);
+  --pen-surface: rgba(26, 33, 25, 0.035);
+  --pen-surface-2: rgba(26, 33, 25, 0.06);
+  --pen-surface-hover: rgba(21, 122, 81, 0.08);
+  --pen-border: rgba(60, 70, 59, 0.16);
+  --pen-border-2: rgba(0, 0, 0, 0.08);
+  --pen-gold: #b78d3c;        /* fill gold */
+  --pen-gold-2: #8a6a1f;      /* text-safe gold on light */
+  --pen-gold-deep: #6f531a;
+  --pen-green: #157a51;
+  --pen-ink: #1c241b;         /* high-contrast charcoal */
+  --pen-fg-2: #3d473c;
+  --pen-fg-3: #6b7568;
+  --pen-ok: #157a51;
+}
+
+/* Dark mode — re-tuned premium charcoal + bright gold */
+[data-pen-theme="dark"] {
   --pen-bg: #0b0e13;
   --pen-bg-2: #0f141c;
   --pen-bg-top: rgba(11, 14, 19, 0.72);
@@ -139,10 +160,11 @@ html { scroll-behavior: smooth; }
   --pen-gold: #c9a662;
   --pen-gold-2: #e6cf98;
   --pen-gold-deep: #9c7b3f;
-  --pen-ink: #f4efe4;      /* warm white */
+  --pen-green: #58c48c;
+  --pen-ink: #f4efe4;
   --pen-fg-2: #cfc9ba;
   --pen-fg-3: #8f897c;
-  --pen-ok: #6fbf8b;
+  --pen-ok: #58c48c;
 }
 
 .pen-serif {
@@ -153,8 +175,15 @@ html { scroll-behavior: smooth; }
 .bg-pen-mesh {
   background-color: var(--pen-bg);
   background-image:
+    radial-gradient(at 15% 12%, rgba(183,141,60,0.10) 0px, transparent 42%),
+    radial-gradient(at 85% 8%, rgba(21,122,81,0.07) 0px, transparent 40%),
+    radial-gradient(at 78% 88%, rgba(183,141,60,0.08) 0px, transparent 45%),
+    radial-gradient(at 12% 82%, rgba(21,122,81,0.05) 0px, transparent 40%);
+}
+[data-pen-theme="dark"] .bg-pen-mesh {
+  background-image:
     radial-gradient(at 15% 12%, rgba(201,166,98,0.14) 0px, transparent 42%),
-    radial-gradient(at 85% 8%, rgba(230,207,152,0.08) 0px, transparent 40%),
+    radial-gradient(at 85% 8%, rgba(88,196,140,0.06) 0px, transparent 40%),
     radial-gradient(at 78% 88%, rgba(156,123,63,0.12) 0px, transparent 45%),
     radial-gradient(at 12% 82%, rgba(255,255,255,0.03) 0px, transparent 40%);
 }

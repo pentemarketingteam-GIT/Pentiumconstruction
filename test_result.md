@@ -103,12 +103,13 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Rebuild the site as a brand-new "School of Play" website on the Careplus code foundation.
-  Careplus AI/auth/intake/TTS features were removed. Backend was slimmed to a single enquiry
-  submission/storage endpoint matching the School of Play contact form fields.
+  Build the dynamic part for Pentium Constructions (premium Kerala real-estate developer),
+  modelled on the School of Play AI reference. A "Pentium Home Advisor" (Claude via Emergent
+  LLM key) guides buyers through projects/services/company info with a LIVE visual canvas that
+  changes per question, plus lead/enquiry capture (mid-chat AND a standard form). Premium dark/gold UI.
 
 backend:
-  - task: "Enquiry submission + storage API (/api/enquiries POST & GET)"
+  - task: "Pentium enquiry API (/api/enquiries POST & GET)"
     implemented: true
     working: true
     file: "backend/server.py"
@@ -118,78 +119,54 @@ backend:
     status_history:
         -working: "NA"
         -agent: "main"
-        -comment: "Rewrote server.py. New EnquiryCreate model with fields: full_name, email, phone, audience, service, school_name_location, enquiry (required), mailing_list (bool), source. POST /api/enquiries stores to db.enquiries and returns EnquirySubmission (uuid id + created_at). GET /api/enquiries lists newest-first. Removed all Careplus AI/auth/intake endpoints. Also recreated missing .env files (MONGO_URL, DB_NAME=schoolofplay, REACT_APP_BACKEND_URL) which had been lost. Needs testing: valid submit, required-field validation (missing full_name/email/enquiry -> 422), invalid email -> 422, GET list returns stored docs, no Mongo ObjectId leakage."
+        -comment: "Rewrote server.py for Pentium. EnquiryCreate fields: full_name (req), phone, email, project_of_interest, message (req), source. POST /api/enquiries stores to db.enquiries returning EnquirySubmission (uuid id + ISO created_at). GET /api/enquiries lists newest-first, no _id leakage. Please test: valid full submit, minimal submit (full_name+message), missing required (full_name/message -> 422), GET list returns docs newest-first."
         -working: true
         -agent: "testing"
-        -comment: "Comprehensive backend testing completed - ALL 8 TESTS PASSED. Created backend_test.py with full test coverage. Results: (1) GET /api/ health check returns correct message and status. (2) POST /api/enquiries with full payload (all fields) returns 200 with valid UUID id, ISO created_at, all fields echoed, no _id leakage. (3) POST /api/enquiries with minimal payload (only required fields) returns 200 with defaults applied (mailing_list=false). (4-6) Validation correctly rejects missing required fields (full_name, email, enquiry) with 422. (7) Validation correctly rejects invalid email format with 422. (8) GET /api/enquiries returns list of enquiries, newest first, all with valid UUID ids, created_at timestamps, no _id leakage, and all created enquiries present. Backend API is fully functional and production-ready."
+        -comment: "✅ ALL TESTS PASSED (6/6). Health check: GET /api/ returns correct message and status. Full enquiry submission: all fields (full_name, phone, email, project_of_interest, message, source) correctly stored with valid UUID id and ISO created_at, no _id leakage. Minimal enquiry submission: only full_name + message works correctly with optional fields as null. Validation: missing full_name returns 422, missing message returns 422. GET /api/enquiries: returns list newest-first with valid UUIDs, no _id leakage, all created enquiries present. All enquiry API endpoints working perfectly."
+  - task: "Pentium Home Advisor AI chat API (/api/assistant/chat) with Claude + lead capture"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "POST /api/assistant/chat via emergentintegrations LlmChat + claude-sonnet-4-6 using EMERGENT_LLM_KEY. Multi-turn via session_id (history in db.chat_messages). Strictly grounded on Pentium website content. Returns JSON {session_id, reply, panels[valid keys from VALID_PANELS], suggestions[], lead_submitted}. When model marks lead ready_to_submit with valid full_name+phone+message, backend auto-inserts enquiry with source='ai_advisor'. GET /api/assistant/history/{session_id}. Please test: (1) basic chat returns reply+panels+session_id; (2) multi-turn context retained; (3) grounding (asking unknown e.g. exact price/floor plan -> no fabrication, points to contact/phone); (4) lead capture across turns writes enquiry with source='ai_advisor' (check GET /api/enquiries); (5) empty message -> 422. Use 30-40s timeouts (Claude can take up to 20s). Valid panel keys: welcome, projects, project_eternia, project_tranquil, project_harmony, project_spring_green, project_palm_grove, project_civil_park, project_aishwarya, services, why_pentium, quality_process, go_green, csr, about, contact, book_visit."
+        -working: true
+        -agent: "testing"
+        -comment: "✅ ALL TESTS PASSED (5/5). Basic chat: POST /api/assistant/chat with 'Tell me about Spring Green Villas' returns 200 with non-empty reply (475 chars), correct session_id, panels array containing 'project_spring_green', 4 suggestions, lead_submitted=false. Multi-turn memory: tested with Pentium Harmony Heights context across 2 turns - second turn correctly references context (45% complete, ongoing, RERA certified). GET /api/assistant/history/{session_id} returns 4 messages in chronological order with correct roles. Grounding: asked for exact price/floor plan of Pentium Eternia - assistant correctly indicated no info available and directed to contact phone +91 9544 141 000, NO fabrication detected. Lead capture end-to-end: collected name (Arun Nair), phone (+91 9988776655), and message over 4 turns, lead_submitted became true, enquiry correctly stored in database with source='ai_advisor' and all details. Empty message validation: correctly returns 422. Claude integration working perfectly with proper grounding and lead capture."
 
 frontend:
-  - task: "Dynamic AI experience: every interaction changes left panel + creative launcher (no toggle)"
-    implemented: true
-    working: true
-    file: "frontend/src/pages/sop/Explore.jsx"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-        -working: "NA"
-        -agent: "main"
-        -comment: "BUG FIX for user report: 'clicking a sub-topic (e.g. Swim:ED Features) answered on the right but the LEFT layout did not change / went blank'. Root cause: the send() loading-guard blocked the instant view change while the assistant was still replying. FIX: left-panel view now changes INSTANTLY on every card/chip tap (goto set before the loading guard). Added fine-grained deterministic sub-views (swim_ed_benefits/features/process/pricing, camps_create/sports/locations/bring, pe_pricing/pe_lunchtime) that render the real site content for each section, plus finer backend panel keys. ALSO: removed the STATIC|DYNAMIC header toggle entirely; the site is just the normal website; a creative floating 'PlayLauncher' orb (gradient wand + pulsing rings + confetti squares, NOT a chat bubble) bottom-right opens /explore. /explore now has a minimal top bar ('Back to website'). Needs frontend testing to verify EVERY interaction updates the left panel with correct content."
-        -working: true
-        -agent: "testing"
-        -comment: "Comprehensive UI testing completed - PRIMARY BUG FIX CONFIRMED WORKING. Tested all scenarios from review request: (1) Home page (/) has NO Static/Dynamic toggle - confirmed absent. (2) Floating circular launcher (play orb) visible in bottom-right corner at position (1832, 992) with wand icon, pulsing rings, and confetti squares - confirmed present and functional. (3) Launcher navigates to /explore - confirmed working. (4) /explore page has NO vertical scrollbar (scrollHeight=1080, windowHeight=1080) - confirmed. (5) Left panel shows welcome view with 6 tappable cards, right chat shows greeting - confirmed. (6) Clicked Swim:ED card: left panel changed INSTANTLY to Swim:ED layout with 4 sub-topic cards (Benefits/Features/How it works/Pricing), right chat showed AI reply about Swim:ED - confirmed. (7) THE FIX VERIFIED: Clicked Features card and left panel changed INSTANTLY to Features layout showing ALL 7 expected features (Heated pop-up pool, Temporary modular structure, Qualified instructors and lifeguards, Progress reporting, Curriculum-aligned swimming and water safety, Secure set-up, Inclusive access) - PRIMARY BUG FIX CONFIRMED. (8) Clicked Benefits chip: left panel changed to Benefits layout with benefit items (More learning time, Reduced transport/logistical pressure) - confirmed. (9) Clicked How it works chip: left panel changed to 6-step process layout (Apply, Site Visit, Sign Up, Set-up, Delivery, Impact) - confirmed. (10) Clicked Pricing chip: left panel changed to pricing layout (from £11,104 / from £258) - confirmed. (11) Typed chat 'Tell me about your holiday camps': left panel changed to Holiday Camps layout AFTER AI response (not instantly like card clicks, but functional - AI returned panels: ['holiday_camps'] and view updated correctly showing Summer of Nations banner, Create Groups, Multi-Sports, Locations, What to bring cards) - confirmed working. (12) Back to website link returns to / - confirmed. ALL INTERACTIONS UPDATE THE LEFT PANEL CORRECTLY. The reported bug (Swim:ED → Features not updating left panel) is FIXED. Card/chip clicks change left panel instantly; typed chat changes left panel after AI response (expected behavior based on code logic). No issues found. Feature is production-ready."
-  - task: "School of Play website (design system, pages, particle interaction)"
+  - task: "Pentium Home Advisor experience (chat + live canvas) and branded shell"
     implemented: true
     working: "NA"
-    file: "frontend/src/App.js"
+    file: "frontend/src/pages/pentium/Advisor.jsx"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
         -working: "NA"
         -agent: "main"
-        -comment: "New design system + 16 pages built. Home verified by screenshot. Awaiting user permission before automated frontend testing."
-
-backend:
-  - task: "Play Assistant AI chat API (/api/assistant/chat) with Claude + lead capture"
-    implemented: true
-    working: true
-    file: "backend/server.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-        -working: "NA"
-        -agent: "main"
-        -comment: "New POST /api/assistant/chat using emergentintegrations LlmChat + claude-sonnet-4-6 via EMERGENT_LLM_KEY (server-side only). Multi-turn via session_id (history stored in db.chat_messages and replayed in system prompt). System prompt strictly grounded on School of Play content inventory. Returns JSON {session_id, reply, audience(parent|school|unknown), panels[valid keys], suggestions[], lead_submitted}. When the model marks lead ready_to_submit with valid full_name+email+enquiry, backend auto-inserts into db.enquiries with source='ai_assistant'. Also GET /api/assistant/history/{session_id}. Verified working via manual curl + UI (grounded reply, correct pricing, panels, audience). Needs agent testing: (1) basic chat returns reply+panels+session_id; (2) multi-turn context retained across calls with same session_id; (3) grounding — asking something outside inventory does not fabricate and points to contact/phone; (4) lead capture flow across turns eventually writes an enquiry with source='ai_assistant' (check GET /api/enquiries); (5) empty message -> 422."
-        -working: true
-        -agent: "testing"
-        -comment: "Comprehensive Play Assistant AI chat testing completed - ALL 5 TESTS PASSED (13/13 total including enquiry API). Test A (Basic Chat): POST /api/assistant/chat with parent enquiry about holiday camps returned 200 with non-empty reply (505 chars), correctly identified audience='parent', returned valid panels ['holiday_camps', 'venues', 'faqs_pricing'], 4 suggestion chips, and lead_submitted=false. Test B (Multi-turn Memory): Using session_id='t-multi', first message about Swim:ED interest received appropriate reply with pricing (£11,104 / £258). Second message 'How much does it cost?' correctly referenced Swim:ED pricing from context, proving conversation memory is retained. GET /api/assistant/history/t-multi returned 4 messages (2 user + 2 assistant) in chronological order. Test C (Grounding): Asked about London/Birmingham venues (not in knowledge base). Assistant correctly responded that camps are only in Greater Manchester, did NOT fabricate pricing or venues, and appropriately indicated those areas aren't covered. No hallucination detected. Test D (Lead Capture): 3-turn conversation collected name='Test Head', email='testhead@example.com', school='Sunnydale Primary in Manchester', enquiry about PE provision. lead_submitted flag became true on turn 3. GET /api/enquiries confirmed enquiry was stored with source='ai_assistant', audience='School', service='PE', school_name_location='Sunnydale Primary, Manchester', and correct contact details. Test E (Validation): Empty message correctly rejected with 422 'Empty message'. Claude responses averaged 5-7 seconds (well within 20s limit). All endpoints working perfectly with proper grounding, context retention, and lead capture."
+        -comment: "Built Pentium dark/gold experience. Shell (/) has hero, enquiry form, stats, project preview, floating launcher. Advisor (/advisor) has left live canvas (PentiumCanvas panels: projects list with Ongoing/Completed tabs, rich project cards with image gallery + RERA/status badges, services, why_pentium, quality_process, go_green, csr, about, contact, book_visit) and right Claude chat sidebar with streaming replies + suggestion chips. Card/quick-action clicks switch the canvas instantly (goto before loading guard) and feed the chat. Lead capture via mid-chat AND standard EnquiryForm. Awaiting user permission before automated frontend testing."
 
 metadata:
   created_by: "main_agent"
-  version: "2.1"
-  test_sequence: 2
+  version: "3.1"
+  test_sequence: 4
   run_ui: false
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Pentium enquiry API (/api/enquiries POST & GET)"
+    - "Pentium Home Advisor AI chat API (/api/assistant/chat) with Claude + lead capture"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
 agent_communication:
     -agent: "main"
-    -message: "Backend slimmed to a single enquiry API for School of Play. Please test /api/enquiries POST (valid + validation errors) and GET. All routes are under /api prefix. DB is 'schoolofplay'. Do not test frontend yet."
+    -message: "Pivoted the app to Pentium Constructions. Please test BACKEND only: (1) /api/enquiries POST valid+minimal+validation(422) and GET newest-first; (2) /api/assistant/chat basic chat, multi-turn memory, grounding (no fabrication of prices/floor plans -> points to contact/phone), lead capture end-to-end (writes enquiry source='ai_advisor'), empty message 422. Use 30-40s timeouts for Claude. DB is from env DB_NAME. Do not test frontend yet."
     -agent: "testing"
-    -message: "8/8 backend tests passed. GET /api/ health OK; POST /api/enquiries full + minimal submissions OK with UUID id and ISO created_at, no _id leakage; 422 on missing full_name/email/enquiry and invalid email; GET /api/enquiries returns newest-first list. Backend production-ready."
-    -agent: "testing"
-    -message: "Backend testing complete - ALL TESTS PASSED (8/8). The enquiry API is fully functional: health check works, POST creates enquiries with proper UUID ids and validation, GET lists enquiries correctly ordered newest-first with no MongoDB _id leakage. No issues found. Backend is production-ready."
-    -agent: "main"
-    -message: "Added Play Assistant AI chat API with Claude integration. Please test: (1) basic chat, (2) multi-turn memory, (3) grounding (no hallucination), (4) lead capture end-to-end, (5) empty message validation. Use generous timeouts (30-40s) as Claude responses can take up to 20s."
-    -agent: "testing"
-    -message: "Play Assistant AI chat testing complete - ALL 5 TESTS PASSED (13/13 total). Basic chat works with proper reply/audience/panels/suggestions. Multi-turn memory correctly retains Swim:ED context across turns. Grounding test passed - no hallucination when asked about London/Birmingham (correctly stated only Greater Manchester). Lead capture works end-to-end: collected name/email/school details over 3 turns, lead_submitted flag became true, enquiry stored in database with source='ai_assistant' and correct details. Empty message validation returns 422. Claude responses averaged 5-7s. All backend APIs are production-ready with no issues found."
-    -agent: "main"
-    -message: "Fixed the reported bug where clicking Swim:ED → Features would answer on the right but left panel stayed blank. The fix makes left panel change INSTANTLY on every card/chip tap. Also removed Static/Dynamic toggle and added creative floating PlayLauncher orb. Please test the dynamic AI experience thoroughly: verify toggle is gone, launcher works, /explore has no scroll, and EVERY interaction (especially Swim:ED → Features) updates the left panel with correct content."
-    -agent: "testing"
-    -message: "Frontend dynamic AI experience testing complete - ALL TESTS PASSED. PRIMARY BUG FIX CONFIRMED: Swim:ED → Features now updates left panel instantly with all 7 expected features. Comprehensive testing verified: (1) No Static/Dynamic toggle on home page. (2) Floating play orb launcher present in bottom-right with wand icon, pulsing rings, confetti squares. (3) Launcher navigates to /explore. (4) /explore has no vertical scroll. (5) Welcome view shows 6 cards, chat shows greeting. (6) Swim:ED card click: left panel changes instantly to Swim:ED layout with 4 sub-topics, chat shows AI reply. (7) Features card click: left panel changes instantly to Features layout with all 7 features (Heated pop-up pool, Temporary modular structure, Qualified instructors, Progress reporting, Curriculum-aligned, Secure set-up, Inclusive access). (8) Benefits/How it works/Pricing chips all update left panel instantly with correct content. (9) Typed chat 'Tell me about your holiday camps' updates left panel to Holiday Camps layout after AI response (functional, AI returned correct panel key). (10) Back to website link works. The reported bug is FIXED. All interactions update left panel correctly. Feature is production-ready with no issues found."
+    -message: "✅ BACKEND TESTING COMPLETE - ALL TESTS PASSED (11/11). Enquiry API: All 6 tests passed including health check, full/minimal submission, validation (missing full_name/message -> 422), and GET list newest-first with no _id leakage. Pentium Home Advisor AI: All 5 tests passed including basic chat with correct panels (project_spring_green), multi-turn memory retention (Harmony Heights context), excellent grounding (no price/floor plan fabrication, directs to contact), end-to-end lead capture (enquiry stored with source='ai_advisor'), and empty message validation (422). Claude integration is working perfectly with 30-40s timeouts. No issues found. Ready for main agent to summarize and finish."

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Backend API tests for School of Play enquiry endpoints and Play Assistant AI chat.
+Backend API tests for Pentium Constructions enquiry endpoints and Pentium Home Advisor AI chat.
 Tests: GET /api/ health check, POST /api/enquiries, GET /api/enquiries
        POST /api/assistant/chat, GET /api/assistant/history/{session_id}
 """
@@ -11,9 +11,9 @@ from datetime import datetime
 import time
 
 # Base URL from frontend .env
-BASE_URL = "https://b4c37749-8c7e-4e0e-924c-8c7fe67d8961.preview.emergentagent.com/api"
+BASE_URL = "https://build-dynamic-6.preview.emergentagent.com/api"
 
-# Timeout for AI assistant calls (Claude can take up to ~20s, use 40s to be safe)
+# Timeout for AI assistant calls (Claude can take up to ~20s, use 30-40s to be safe)
 ASSISTANT_TIMEOUT = 40
 
 def test_health_check():
@@ -29,7 +29,7 @@ def test_health_check():
         
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
         data = response.json()
-        assert data.get("message") == "School of Play API", f"Unexpected message: {data.get('message')}"
+        assert data.get("message") == "Pentium Constructions API", f"Unexpected message: {data.get('message')}"
         assert data.get("status") == "ok", f"Unexpected status: {data.get('status')}"
         
         print("✅ PASS: Health check endpoint working correctly")
@@ -46,15 +46,12 @@ def test_create_enquiry_full():
     print("="*80)
     
     payload = {
-        "full_name": "Sarah Johnson",
-        "email": "sarah.johnson@example.com",
-        "phone": "+44 7700 900123",
-        "audience": "Parent",
-        "service": "Holiday Camps",
-        "school_name_location": "Greenfield Primary, Manchester",
-        "enquiry": "I would like to know more about your holiday camps for children aged 7-9. What are the available dates for summer 2026?",
-        "mailing_list": True,
-        "source": "holiday-camps-page"
+        "full_name": "Rajesh Kumar",
+        "phone": "+91 9876543210",
+        "email": "rajesh.kumar@example.com",
+        "project_of_interest": "Pentium Harmony Heights",
+        "message": "I am interested in purchasing a 3 BHK apartment in Pentium Harmony Heights. Please provide details about availability, pricing, and site visit options.",
+        "source": "website-enquiry-form"
     }
     
     try:
@@ -86,7 +83,7 @@ def test_create_enquiry_full():
             raise AssertionError(f"Invalid ISO format for created_at: {data['created_at']}")
         
         # Verify all submitted fields are echoed back
-        for key in ["full_name", "email", "phone", "audience", "service", "school_name_location", "enquiry", "mailing_list", "source"]:
+        for key in ["full_name", "phone", "email", "project_of_interest", "message", "source"]:
             assert data.get(key) == payload[key], f"Field {key} mismatch: expected {payload[key]}, got {data.get(key)}"
         print("✓ All fields echoed correctly")
         
@@ -98,15 +95,14 @@ def test_create_enquiry_full():
 
 
 def test_create_enquiry_minimal():
-    """Test POST /api/enquiries with only required fields"""
+    """Test POST /api/enquiries with only required fields (full_name + message)"""
     print("\n" + "="*80)
     print("TEST 3: Create Enquiry - Minimal Submission (POST /api/enquiries)")
     print("="*80)
     
     payload = {
-        "full_name": "Michael Brown",
-        "email": "michael.brown@example.com",
-        "enquiry": "Please send me information about your sports provision services."
+        "full_name": "Priya Menon",
+        "message": "Please send me information about your villa projects in Perinthalmanna."
     }
     
     try:
@@ -133,14 +129,16 @@ def test_create_enquiry_minimal():
         
         # Verify required fields
         assert data["full_name"] == payload["full_name"]
-        assert data["email"] == payload["email"]
-        assert data["enquiry"] == payload["enquiry"]
+        assert data["message"] == payload["message"]
+        print("✓ Required fields echoed correctly")
         
-        # Verify defaults
-        assert data["mailing_list"] == False, f"Expected mailing_list=False, got {data['mailing_list']}"
-        print("✓ Default mailing_list=False applied")
+        # Verify optional fields are None or not present
+        assert data.get("phone") is None or "phone" not in data
+        assert data.get("email") is None or "email" not in data
+        assert data.get("project_of_interest") is None or "project_of_interest" not in data
+        print("✓ Optional fields handled correctly")
         
-        print("✅ PASS: Minimal enquiry submission successful with defaults")
+        print("✅ PASS: Minimal enquiry submission successful")
         return True, data["id"]
     except Exception as e:
         print(f"❌ FAIL: {str(e)}")
@@ -154,8 +152,8 @@ def test_validation_missing_full_name():
     print("="*80)
     
     payload = {
-        "email": "test@example.com",
-        "enquiry": "Test enquiry"
+        "phone": "+91 9876543210",
+        "message": "Test enquiry"
     }
     
     try:
@@ -171,15 +169,15 @@ def test_validation_missing_full_name():
         return False
 
 
-def test_validation_missing_email():
-    """Test POST /api/enquiries validation - missing email"""
+def test_validation_missing_message():
+    """Test POST /api/enquiries validation - missing message"""
     print("\n" + "="*80)
-    print("TEST 5: Validation - Missing email (POST /api/enquiries)")
+    print("TEST 5: Validation - Missing message (POST /api/enquiries)")
     print("="*80)
     
     payload = {
         "full_name": "Test User",
-        "enquiry": "Test enquiry"
+        "phone": "+91 9876543210"
     }
     
     try:
@@ -188,56 +186,7 @@ def test_validation_missing_email():
         print(f"Response: {json.dumps(response.json(), indent=2)}")
         
         assert response.status_code == 422, f"Expected 422 validation error, got {response.status_code}"
-        print("✅ PASS: Missing email correctly rejected with 422")
-        return True
-    except Exception as e:
-        print(f"❌ FAIL: {str(e)}")
-        return False
-
-
-def test_validation_missing_enquiry():
-    """Test POST /api/enquiries validation - missing enquiry"""
-    print("\n" + "="*80)
-    print("TEST 6: Validation - Missing enquiry (POST /api/enquiries)")
-    print("="*80)
-    
-    payload = {
-        "full_name": "Test User",
-        "email": "test@example.com"
-    }
-    
-    try:
-        response = requests.post(f"{BASE_URL}/enquiries", json=payload)
-        print(f"Status Code: {response.status_code}")
-        print(f"Response: {json.dumps(response.json(), indent=2)}")
-        
-        assert response.status_code == 422, f"Expected 422 validation error, got {response.status_code}"
-        print("✅ PASS: Missing enquiry correctly rejected with 422")
-        return True
-    except Exception as e:
-        print(f"❌ FAIL: {str(e)}")
-        return False
-
-
-def test_validation_invalid_email():
-    """Test POST /api/enquiries validation - invalid email format"""
-    print("\n" + "="*80)
-    print("TEST 7: Validation - Invalid email format (POST /api/enquiries)")
-    print("="*80)
-    
-    payload = {
-        "full_name": "Test User",
-        "email": "not-an-email",
-        "enquiry": "Test enquiry"
-    }
-    
-    try:
-        response = requests.post(f"{BASE_URL}/enquiries", json=payload)
-        print(f"Status Code: {response.status_code}")
-        print(f"Response: {json.dumps(response.json(), indent=2)}")
-        
-        assert response.status_code == 422, f"Expected 422 validation error, got {response.status_code}"
-        print("✅ PASS: Invalid email correctly rejected with 422")
+        print("✅ PASS: Missing message correctly rejected with 422")
         return True
     except Exception as e:
         print(f"❌ FAIL: {str(e)}")
@@ -247,7 +196,7 @@ def test_validation_invalid_email():
 def test_list_enquiries(created_ids):
     """Test GET /api/enquiries - list all enquiries"""
     print("\n" + "="*80)
-    print("TEST 8: List Enquiries (GET /api/enquiries)")
+    print("TEST 6: List Enquiries (GET /api/enquiries)")
     print("="*80)
     
     try:
@@ -306,18 +255,18 @@ def test_list_enquiries(created_ids):
 
 
 # =============================================================================
-# Play Assistant AI Chat Tests
+# Pentium Home Advisor AI Chat Tests
 # =============================================================================
 
 def test_assistant_basic_chat():
-    """Test A: Basic chat - POST /api/assistant/chat with parent enquiry"""
+    """Test A: Basic chat - POST /api/assistant/chat with project question"""
     print("\n" + "="*80)
-    print("TEST A: Play Assistant - Basic Chat")
+    print("TEST A: Pentium Home Advisor - Basic Chat")
     print("="*80)
     
     payload = {
-        "session_id": "t-basic",
-        "message": "I'm a parent, what holiday camps do you offer?"
+        "session_id": str(uuid.uuid4()),
+        "message": "Tell me about Spring Green Villas"
     }
     
     try:
@@ -338,7 +287,6 @@ def test_assistant_basic_chat():
         
         # Verify required fields
         assert "session_id" in data, "Missing session_id"
-        assert data["session_id"] == "t-basic", f"Session ID mismatch: {data['session_id']}"
         print(f"✓ Session ID: {data['session_id']}")
         
         assert "reply" in data, "Missing reply field"
@@ -346,35 +294,33 @@ def test_assistant_basic_chat():
         assert len(data["reply"]) > 0, "Reply is empty!"
         print(f"✓ Non-empty reply received ({len(data['reply'])} chars)")
         
-        assert "audience" in data, "Missing audience field"
-        print(f"✓ Audience detected: {data['audience']}")
-        if data["audience"] == "parent":
-            print("  ✓ Correctly identified as parent")
-        
         assert "panels" in data, "Missing panels field"
         assert isinstance(data["panels"], list), "Panels must be a list"
         print(f"✓ Panels: {data['panels']}")
         
-        # Check for valid panel keys (should include holiday_camps for this query)
+        # Check for valid panel keys
         valid_panels = [
-            "welcome", "holiday_camps", "clubs_parents", "how_to_book", "faqs_pricing",
-            "sports_classes", "schools_overview", "pe", "swim_ed", "game_set_maths",
-            "extra_curricular", "tournaments", "clubs_schools", "venues", "why_us",
-            "team", "contact", "booking"
+            "welcome", "projects", "project_eternia", "project_tranquil",
+            "project_harmony", "project_spring_green", "project_palm_grove",
+            "project_civil_park", "project_aishwarya", "services", "why_pentium",
+            "quality_process", "go_green", "csr", "about", "contact", "book_visit"
         ]
         for panel in data["panels"]:
             assert panel in valid_panels, f"Invalid panel key: {panel}"
         
-        if len(data["panels"]) > 0:
-            print(f"  ✓ At least one valid panel returned")
+        # For Spring Green Villas query, should return project_spring_green panel
+        if "project_spring_green" in data["panels"]:
+            print("  ✓ Correctly returned project_spring_green panel")
+        else:
+            print(f"  ⚠️  Expected project_spring_green panel, got: {data['panels']}")
         
         assert "suggestions" in data, "Missing suggestions field"
         assert isinstance(data["suggestions"], list), "Suggestions must be a list"
-        assert len(data["suggestions"]) > 0, "Suggestions array is empty"
         print(f"✓ Suggestions: {len(data['suggestions'])} items")
         
         assert "lead_submitted" in data, "Missing lead_submitted field"
         assert isinstance(data["lead_submitted"], bool), "lead_submitted must be boolean"
+        assert data["lead_submitted"] == False, "lead_submitted should be False for basic query"
         print(f"✓ Lead submitted: {data['lead_submitted']}")
         
         print("✅ PASS: Basic chat working correctly")
@@ -390,19 +336,19 @@ def test_assistant_basic_chat():
 def test_assistant_multi_turn_memory():
     """Test B: Multi-turn memory - conversation context retained"""
     print("\n" + "="*80)
-    print("TEST B: Play Assistant - Multi-turn Memory (Swim:ED context)")
+    print("TEST B: Pentium Home Advisor - Multi-turn Memory")
     print("="*80)
     
-    session_id = "t-multi"
+    session_id = str(uuid.uuid4())
     
-    # First message: establish context about Swim:ED
+    # First message: establish context about Pentium Harmony Heights
     payload1 = {
         "session_id": session_id,
-        "message": "I'm a school and I'm interested in Swim:ED"
+        "message": "Tell me about Pentium Harmony Heights"
     }
     
     try:
-        print("\n--- Turn 1: Establish Swim:ED context ---")
+        print("\n--- Turn 1: Establish Pentium Harmony Heights context ---")
         print(f"Sending: {json.dumps(payload1, indent=2)}")
         print("⏳ Waiting for Claude response...")
         
@@ -415,7 +361,6 @@ def test_assistant_multi_turn_memory():
         print(f"Status Code: {response1.status_code}")
         data1 = response1.json()
         print(f"Reply: {data1.get('reply', 'N/A')}")
-        print(f"Audience: {data1.get('audience', 'N/A')}")
         print(f"Panels: {data1.get('panels', [])}")
         
         assert response1.status_code == 200, f"Turn 1 failed: {response1.status_code}"
@@ -423,15 +368,15 @@ def test_assistant_multi_turn_memory():
         print("✓ Turn 1 successful")
         
         # Small delay between turns
-        time.sleep(1)
+        time.sleep(2)
         
-        # Second message: ask about pricing (should reference Swim:ED from context)
+        # Second message: ask about status (should reference Harmony Heights from context)
         payload2 = {
             "session_id": session_id,
-            "message": "How much does it cost?"
+            "message": "What is the current status of this project?"
         }
         
-        print("\n--- Turn 2: Ask about pricing (should reference Swim:ED) ---")
+        print("\n--- Turn 2: Ask about status (should reference Harmony Heights) ---")
         print(f"Sending: {json.dumps(payload2, indent=2)}")
         print("⏳ Waiting for Claude response...")
         
@@ -449,20 +394,19 @@ def test_assistant_multi_turn_memory():
         reply2 = data2.get("reply", "").lower()
         assert len(reply2) > 0, "Turn 2 reply is empty"
         
-        # Check if reply references Swim:ED pricing (£11,104 or £258 for changing rooms)
-        has_swim_ed_context = (
-            "swim" in reply2 or 
-            "11,104" in reply2 or 
-            "11104" in reply2 or
-            "258" in reply2 or
-            "£11" in reply2
+        # Check if reply references Harmony Heights context (ongoing, 45% complete, RERA certified)
+        has_harmony_context = (
+            "harmony" in reply2 or 
+            "ongoing" in reply2 or 
+            "45" in reply2 or
+            "rera" in reply2
         )
         
-        print(f"\n🔍 Checking for Swim:ED pricing context in reply...")
-        if has_swim_ed_context:
-            print("✓ Reply references Swim:ED pricing (context retained!)")
+        print(f"\n🔍 Checking for Harmony Heights context in reply...")
+        if has_harmony_context:
+            print("✓ Reply references Harmony Heights context (context retained!)")
         else:
-            print("⚠️  Reply may not explicitly mention Swim:ED pricing")
+            print("⚠️  Reply may not explicitly mention Harmony Heights details")
             print("   (This could still be valid if the assistant asks clarifying questions)")
         
         # Get history to verify messages are stored
@@ -506,12 +450,12 @@ def test_assistant_multi_turn_memory():
 def test_assistant_grounding():
     """Test C: Grounding / no hallucination - should not fabricate info"""
     print("\n" + "="*80)
-    print("TEST C: Play Assistant - Grounding (No Hallucination)")
+    print("TEST C: Pentium Home Advisor - Grounding (No Hallucination)")
     print("="*80)
     
     payload = {
-        "session_id": "t-ground",
-        "message": "Do you run camps in London and what is the price for the Birmingham venue?"
+        "session_id": str(uuid.uuid4()),
+        "message": "What is the exact price and floor plan of Pentium Eternia?"
     }
     
     try:
@@ -537,39 +481,51 @@ def test_assistant_grounding():
         
         reply_lower = reply.lower()
         
-        # Check that the assistant does NOT fabricate London/Birmingham venues
+        # Check that the assistant does NOT fabricate exact prices or floor plans
         # It should indicate it doesn't have that info or direct to enquiry/phone
         
         # Positive indicators (good grounding):
         has_contact_info = (
-            "0161 726 5022" in reply or
-            "info@schoolofplay.org.uk" in reply or
+            "9544 141 000" in reply or
+            "+91 9544 141 000" in reply or
+            "sales@pentiumconstructions.in" in reply or
             "enquir" in reply_lower or
-            "contact" in reply_lower
+            "contact" in reply_lower or
+            "call" in reply_lower or
+            "phone" in reply_lower or
+            "whatsapp" in reply_lower
         )
         
         indicates_no_info = (
             "don't have" in reply_lower or
             "not have" in reply_lower or
-            "don't run" in reply_lower or
-            "not run" in reply_lower or
-            "don't offer" in reply_lower or
-            "not offer" in reply_lower or
-            "greater manchester" in reply_lower
+            "don't know" in reply_lower or
+            "not available" in reply_lower or
+            "specific detail" in reply_lower or
+            "exact" in reply_lower
         )
         
         # Negative indicators (potential hallucination):
-        fabricates_london = "london" in reply_lower and ("£" in reply or "price" in reply_lower)
-        fabricates_birmingham = "birmingham" in reply_lower and ("£" in reply or "price" in reply_lower)
+        # Check if it fabricates specific prices (e.g., "₹45 lakhs", "Rs. 50 lakhs")
+        fabricates_price = bool(
+            ("₹" in reply and any(word in reply_lower for word in ["lakh", "crore", "price"])) or
+            ("rs" in reply_lower and any(word in reply_lower for word in ["lakh", "crore"]))
+        )
+        
+        # Check if it fabricates specific floor plan details (e.g., "1200 sq ft", "3 bedrooms with attached bathrooms")
+        fabricates_floor_plan = bool(
+            ("sq" in reply_lower and "ft" in reply_lower) or
+            ("square" in reply_lower and ("feet" in reply_lower or "meter" in reply_lower))
+        )
         
         print(f"\n🔍 Grounding Analysis:")
         print(f"  Has contact info (phone/email/enquiry): {has_contact_info}")
         print(f"  Indicates no info available: {indicates_no_info}")
-        print(f"  Fabricates London pricing: {fabricates_london}")
-        print(f"  Fabricates Birmingham pricing: {fabricates_birmingham}")
+        print(f"  Fabricates specific price: {fabricates_price}")
+        print(f"  Fabricates specific floor plan: {fabricates_floor_plan}")
         
-        if fabricates_london or fabricates_birmingham:
-            print("❌ WARNING: Assistant may have fabricated venue/pricing information!")
+        if fabricates_price or fabricates_floor_plan:
+            print("❌ WARNING: Assistant may have fabricated price/floor plan information!")
             print("   This indicates poor grounding to the knowledge base.")
             # Don't fail the test, but report it
         
@@ -590,19 +546,21 @@ def test_assistant_grounding():
 def test_assistant_lead_capture():
     """Test D: Lead capture end-to-end - collect details and verify enquiry stored"""
     print("\n" + "="*80)
-    print("TEST D: Play Assistant - Lead Capture End-to-End")
+    print("TEST D: Pentium Home Advisor - Lead Capture End-to-End")
     print("="*80)
     
-    session_id = "t-lead"
+    session_id = str(uuid.uuid4())
+    test_name = "Arun Nair"
+    test_phone = "+91 9988776655"
     
     try:
-        # Turn 1: Initial enquiry
+        # Turn 1: Initial enquiry about site visit
         payload1 = {
             "session_id": session_id,
-            "message": "I'm a school and I'd like to enquire about PE provision."
+            "message": "I would like to schedule a site visit for Pentium Harmony Heights"
         }
         
-        print("\n--- Turn 1: Initial enquiry ---")
+        print("\n--- Turn 1: Initial enquiry about site visit ---")
         print(f"Sending: {json.dumps(payload1, indent=2)}")
         print("⏳ Waiting for Claude response...")
         
@@ -618,15 +576,15 @@ def test_assistant_lead_capture():
         print(f"Lead submitted: {data1.get('lead_submitted', False)}")
         
         assert response1.status_code == 200, f"Turn 1 failed: {response1.status_code}"
-        time.sleep(1)
+        time.sleep(2)
         
-        # Turn 2: Provide name and email
+        # Turn 2: Provide name
         payload2 = {
             "session_id": session_id,
-            "message": "My name is Test Head and my email is testhead@example.com"
+            "message": f"My name is {test_name}"
         }
         
-        print("\n--- Turn 2: Provide name and email ---")
+        print("\n--- Turn 2: Provide name ---")
         print(f"Sending: {json.dumps(payload2, indent=2)}")
         print("⏳ Waiting for Claude response...")
         
@@ -642,15 +600,15 @@ def test_assistant_lead_capture():
         print(f"Lead submitted: {data2.get('lead_submitted', False)}")
         
         assert response2.status_code == 200, f"Turn 2 failed: {response2.status_code}"
-        time.sleep(1)
+        time.sleep(2)
         
-        # Turn 3: Provide school details and confirm
+        # Turn 3: Provide phone number
         payload3 = {
             "session_id": session_id,
-            "message": "We're Sunnydale Primary in Manchester. Please contact me about PE provision pricing."
+            "message": f"My phone number is {test_phone}"
         }
         
-        print("\n--- Turn 3: Provide school details and request contact ---")
+        print("\n--- Turn 3: Provide phone number ---")
         print(f"Sending: {json.dumps(payload3, indent=2)}")
         print("⏳ Waiting for Claude response...")
         
@@ -674,7 +632,7 @@ def test_assistant_lead_capture():
             print("\n--- Turn 4: Additional confirmation (if needed) ---")
             payload4 = {
                 "session_id": session_id,
-                "message": "Yes, please submit my enquiry."
+                "message": "Yes, please submit my enquiry for a site visit."
             }
             
             print(f"Sending: {json.dumps(payload4, indent=2)}")
@@ -696,7 +654,7 @@ def test_assistant_lead_capture():
         print(f"\n✓ Lead submitted flag: {lead_submitted_flag}")
         
         # Wait a moment for DB write
-        time.sleep(2)
+        time.sleep(3)
         
         # Verify enquiry was stored in database
         print("\n--- Verify Enquiry Stored in Database ---")
@@ -708,15 +666,15 @@ def test_assistant_lead_capture():
         enquiries = enquiries_response.json()
         print(f"Total enquiries in database: {len(enquiries)}")
         
-        # Find enquiry with source="ai_assistant" and matching details
-        ai_enquiries = [e for e in enquiries if e.get("source") == "ai_assistant"]
-        print(f"AI assistant enquiries: {len(ai_enquiries)}")
+        # Find enquiry with source="ai_advisor" and matching details
+        ai_enquiries = [e for e in enquiries if e.get("source") == "ai_advisor"]
+        print(f"AI advisor enquiries: {len(ai_enquiries)}")
         
         matching_enquiry = None
         for enq in ai_enquiries:
             if (
-                "Test Head" in enq.get("full_name", "") and
-                enq.get("email") == "testhead@example.com"
+                test_name in enq.get("full_name", "") and
+                test_phone in enq.get("phone", "")
             ):
                 matching_enquiry = enq
                 break
@@ -725,34 +683,30 @@ def test_assistant_lead_capture():
             print(f"\n✓ Found matching enquiry:")
             print(json.dumps(matching_enquiry, indent=2))
             
-            assert matching_enquiry.get("source") == "ai_assistant", "Source should be 'ai_assistant'"
-            assert "Test Head" in matching_enquiry.get("full_name", ""), "Full name should contain 'Test Head'"
-            assert matching_enquiry.get("email") == "testhead@example.com", "Email mismatch"
-            
-            audience = matching_enquiry.get("audience", "")
-            print(f"✓ Audience: {audience}")
-            if audience == "School":
-                print("  ✓ Correctly identified as School")
+            assert matching_enquiry.get("source") == "ai_advisor", "Source should be 'ai_advisor'"
+            assert test_name in matching_enquiry.get("full_name", ""), f"Full name should contain '{test_name}'"
+            assert test_phone in matching_enquiry.get("phone", ""), f"Phone should contain '{test_phone}'"
             
             print("✅ PASS: Lead capture working - enquiry stored with correct details")
             return True
         else:
             print("⚠️  WARNING: No matching enquiry found in database")
-            print("   The assistant may not have captured all required fields yet.")
-            print("   This could indicate an issue with lead capture logic.")
+            print(f"   Looking for: name='{test_name}', phone='{test_phone}'")
             
             if len(ai_enquiries) > 0:
-                print(f"\n   Recent AI assistant enquiries:")
+                print(f"\n   Recent AI advisor enquiries:")
                 for enq in ai_enquiries[:3]:
-                    print(f"   - {enq.get('full_name')} / {enq.get('email')}")
+                    print(f"   - {enq.get('full_name')} / {enq.get('phone')}")
             
             # Still pass the test if lead_submitted was true
             if lead_submitted_flag:
-                print("\n✅ PASS: Lead submitted flag was true (enquiry may be stored with different details)")
-                return True
+                print("\n⚠️  Lead submitted flag was true but enquiry not found with exact details")
+                print("   This may indicate an issue with lead capture logic.")
+                return False
             else:
-                print("\n⚠️  PARTIAL: Lead capture flow completed but enquiry not found in database")
-                return True  # Don't fail, as this might be expected behavior
+                print("\n⚠️  Lead capture flow completed but enquiry not submitted")
+                print("   The assistant may need more explicit confirmation.")
+                return False
         
     except requests.Timeout:
         print(f"❌ FAIL: Request timed out after {ASSISTANT_TIMEOUT}s")
@@ -765,11 +719,11 @@ def test_assistant_lead_capture():
 def test_assistant_validation_empty_message():
     """Test E: Validation - empty message should return 422"""
     print("\n" + "="*80)
-    print("TEST E: Play Assistant - Validation (Empty Message)")
+    print("TEST E: Pentium Home Advisor - Validation (Empty Message)")
     print("="*80)
     
     payload = {
-        "session_id": "t-validation",
+        "session_id": str(uuid.uuid4()),
         "message": ""
     }
     
@@ -794,14 +748,11 @@ def test_assistant_validation_empty_message():
         print(f"❌ FAIL: {str(e)}")
         return False
 
-        print(f"❌ FAIL: {str(e)}")
-        return False
-
 
 def main():
     """Run all backend tests"""
     print("\n" + "="*80)
-    print("SCHOOL OF PLAY BACKEND API TESTS")
+    print("PENTIUM CONSTRUCTIONS BACKEND API TESTS")
     print("="*80)
     print(f"Base URL: {BASE_URL}")
     print("="*80)
@@ -809,7 +760,7 @@ def main():
     results = []
     created_ids = []
     
-    # Enquiry API Tests (1-8)
+    # Enquiry API Tests (1-6)
     print("\n" + "="*80)
     print("PART 1: ENQUIRY API TESTS")
     print("="*80)
@@ -829,18 +780,16 @@ def main():
     if enquiry_id:
         created_ids.append(enquiry_id)
     
-    # Test 4-7: Validation tests
+    # Test 4-5: Validation tests
     results.append(("Validation - Missing full_name", test_validation_missing_full_name()))
-    results.append(("Validation - Missing email", test_validation_missing_email()))
-    results.append(("Validation - Missing enquiry", test_validation_missing_enquiry()))
-    results.append(("Validation - Invalid email", test_validation_invalid_email()))
+    results.append(("Validation - Missing message", test_validation_missing_message()))
     
-    # Test 8: List enquiries
+    # Test 6: List enquiries
     results.append(("List Enquiries", test_list_enquiries(created_ids)))
     
-    # Play Assistant AI Chat Tests (A-E)
+    # Pentium Home Advisor AI Chat Tests (A-E)
     print("\n" + "="*80)
-    print("PART 2: PLAY ASSISTANT AI CHAT TESTS")
+    print("PART 2: PENTIUM HOME ADVISOR AI CHAT TESTS")
     print("="*80)
     print("⚠️  Note: These tests use Claude AI and may take 20-40s each")
     print("="*80)

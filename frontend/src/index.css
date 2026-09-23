@@ -123,3 +123,115 @@
 
 html { scroll-behavior: smooth; }
 ::selection { background: hsl(var(--sop-yellow)); color: hsl(var(--sop-ink)); }
+
+/* ============================================================
+   PENTIUM CONSTRUCTIONS — premium dark / gold theme tokens
+   ============================================================ */
+:root {
+  --pen-bg: #0b0e13;
+  --pen-bg-2: #0f141c;
+  --pen-bg-top: rgba(11, 14, 19, 0.72);
+  --pen-surface: rgba(255, 255, 255, 0.035);
+  --pen-surface-2: rgba(255, 255, 255, 0.06);
+  --pen-surface-hover: rgba(201, 166, 98, 0.10);
+  --pen-border: rgba(201, 166, 98, 0.16);
+  --pen-border-2: rgba(255, 255, 255, 0.08);
+  --pen-gold: #c9a662;
+  --pen-gold-2: #e6cf98;
+  --pen-gold-deep: #9c7b3f;
+  --pen-ink: #f4efe4;      /* warm white */
+  --pen-fg-2: #cfc9ba;
+  --pen-fg-3: #8f897c;
+  --pen-ok: #6fbf8b;
+}
+
+.pen-serif {
+  font-family: 'Fredoka', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+}
+
+.bg-pen-mesh {
+  background-color: var(--pen-bg);
+  background-image:
+    radial-gradient(at 15% 12%, rgba(201,166,98,0.14) 0px, transparent 42%),
+    radial-gradient(at 85% 8%, rgba(230,207,152,0.08) 0px, transparent 40%),
+    radial-gradient(at 78% 88%, rgba(156,123,63,0.12) 0px, transparent 45%),
+    radial-gradient(at 12% 82%, rgba(255,255,255,0.03) 0px, transparent 40%);
+}
+
+.pen-gold-text {
+  background-image: linear-gradient(100deg, var(--pen-gold), var(--pen-gold-2) 60%, var(--pen-gold-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pen-card {
+  background: var(--pen-surface);
+  border: 1px solid var(--pen-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.pen-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  color: #1a140a;
+  background: linear-gradient(135deg, var(--pen-gold-2), var(--pen-gold));
+  box-shadow: 0 14px 34px -14px rgba(201,166,98,0.6);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+.pen-btn-gold:hover { transform: translateY(-2px); filter: brightness(1.05); }
+.pen-btn-gold:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+
+.pen-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  padding: 0.7rem 1.4rem;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  color: var(--pen-ink);
+  border: 1px solid var(--pen-border);
+  background: var(--pen-surface);
+  transition: all 0.25s ease;
+}
+.pen-btn-ghost:hover { border-color: var(--pen-gold); color: var(--pen-gold-2); }
+
+.pen-field {
+  width: 100%;
+  border-radius: 0.9rem;
+  padding: 0.72rem 1rem;
+  background: var(--pen-surface);
+  border: 1px solid var(--pen-border);
+  color: var(--pen-ink);
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.pen-field::placeholder { color: var(--pen-fg-3); }
+.pen-field:focus { border-color: var(--pen-gold); background: var(--pen-surface-2); }
+
+@keyframes pen-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.animate-pen-float { animation: pen-float 5s ease-in-out infinite; }
+
+@keyframes pen-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pen-float { animation: none; }
+}
+
+.pen-scroll::-webkit-scrollbar { width: 8px; }
+.pen-scroll::-webkit-scrollbar-thumb { background: rgba(201,166,98,0.25); border-radius: 8px; }
+.pen-scroll::-webkit-scrollbar-track { background: transparent; }

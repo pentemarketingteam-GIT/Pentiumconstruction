@@ -84,6 +84,7 @@ function ProjectDetail({ project, onAsk }) {
   if (project.specs) tabs.push("Specifications");
   if (project.blueprints) tabs.push("Blueprints");
   if (project.gallery && project.gallery.length) tabs.push("Gallery");
+  if (project.videoId) tabs.push("Video");
   tabs.push("Location");
   const [tab, setTab] = useState("Overview");
   const [gImg, setGImg] = useState(0);
@@ -172,9 +173,10 @@ function ProjectDetail({ project, onAsk }) {
               ))}
             </div>
             {project.blueprints[bpIdx].url ? (
-              <div className="overflow-hidden rounded-2xl p-3" style={{ border: "1px solid var(--pen-border)", background: "#ffffff" }}>
-                <SmartImg src={project.blueprints[bpIdx].url} alt={`${project.blueprints[bpIdx].label} blueprint`} className="mx-auto max-h-64 w-auto object-contain" />
-              </div>
+              <a href={project.blueprints[bpIdx].url} target="_blank" rel="noreferrer" className="group relative block overflow-hidden rounded-2xl p-3" style={{ border: "1px solid var(--pen-border)", background: "#ffffff" }}>
+                <SmartImg src={project.blueprints[bpIdx].url} alt={`${project.blueprints[bpIdx].label} blueprint`} className="mx-auto w-full object-contain" style={{ maxHeight: "30rem", minHeight: "18rem" }} />
+                <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold opacity-0 transition group-hover:opacity-100" style={{ background: "rgba(0,0,0,0.65)", color: "#fff" }}><ExternalLink className="h-3 w-3" /> Open full size</span>
+              </a>
             ) : (
               <div className="flex flex-col items-center gap-3 rounded-2xl p-8 text-center" style={{ border: "1px dashed var(--pen-border)", background: "var(--pen-surface)" }}>
                 <Layers className="h-8 w-8" style={{ color: "var(--pen-gold-2)" }} />
@@ -182,6 +184,15 @@ function ProjectDetail({ project, onAsk }) {
                 <a href={`${liveUrl}#floor-plans`} target="_blank" rel="noreferrer" className="pen-btn-gold text-sm">View blueprint <ExternalLink className="h-4 w-4" /></a>
               </div>
             )}
+          </motion.div>
+        )}
+
+        {tab === "Video" && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid gap-2">
+            <div className="overflow-hidden rounded-2xl" style={{ border: "1px solid var(--pen-border)", background: "#000" }}>
+              <iframe title={`${project.name} video tour`} src={`https://www.youtube.com/embed/${project.videoId}`} className="aspect-video w-full" style={{ border: 0 }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen loading="lazy" />
+            </div>
+            <p className="text-xs" style={{ color: "var(--pen-fg-3)" }}>Architectural video tour of {project.name}.</p>
           </motion.div>
         )}
 

@@ -55,6 +55,7 @@ export const PROJECTS = [
     started: "1 Jan 2025",
     completion: "31 Dec 2028",
     image: g("project/06-08-26-06-32-Harmony-Heights.jpg"),
+    videoId: "h00HlgYdVKE",
     overview: "Ultra-luxury 2 & 3 BHK apartments across 18 floors in Perinthalmanna, where urban luxury meets environmental mindfulness.",
     vision: "Harmony Heights — a name that encapsulates our commitment to durable happiness. Extra-spacious 2 & 3 BHK apartments with large balconies and windows for ample natural light and ventilation, plus dedicated meditation and yoga areas. An air-conditioned indoor games area, rooftop party area with barbecue corner, swimming pool, well-equipped gym, air-conditioned co-working space and EV charging points make life here extraordinarily convenient.",
     amenitiesCount: 44,
@@ -124,6 +125,7 @@ export const PROJECTS = [
     started: null,
     completion: "Nearing completion",
     image: g("project/06-08-26-05-14-Tranquil-Vertical-Home.jpg"),
+    videoId: "oC7IjQKej3A",
     overview: "Premium 2 & 3 BHK apartments in the serene neighbourhood of Nellikavu near Eranhipalam — luxury meets tranquility in the heart of Calicut.",
     vision: "Nestled in the serene neighbourhood of Nellikavu near Eranhipalam, Pentium Tranquil offers the chance to disconnect from the city's hustle while enjoying the privileges of city living. 28 meticulously designed 2 & 3 BHK homes over Ground + 4 floors, each crafted for a seamless blend of elegance and comfort. Currently nearing completion — an opportunity to personalise and customise your future home.",
     amenitiesCount: 18,
@@ -172,6 +174,7 @@ export const PROJECTS = [
     started: null,
     completion: null,
     image: g("project/06-08-26-05-40-Spring-Green-Villas.jpg"),
+    videoId: "1996OhKZEr4",
     overview: "Premium 3, 4 & 5 BHK villas in Perinthalmanna, blending natural beauty, modern comfort and luxury for an exceptional living experience.",
     vision: "Pentium Spring Green Villas offer premium residences in Perinthalmanna, Malappuram — a gated community blending natural beauty, modern comfort and luxury living.",
     amenitiesCount: 20,
@@ -185,7 +188,13 @@ export const PROJECTS = [
     specs: null, // not exposed publicly -> "available on request"
     blueprintTabs: null,
     blueprint: null,
-    gallery: [g("project/06-08-26-05-40-Spring-Green-Villas.jpg")],
+    gallery: [
+      g("project/06-08-26-05-40-Spring-Green-Villas.jpg"),
+      g("project_gallery/04-08-26-03-11-Spring-Green1.jpg"),
+      g("project_gallery/04-08-26-03-37-Spring-Green2.jpg"),
+      g("project_gallery/04-08-26-03-09-Spring-Green3.jpg"),
+      g("project_gallery/04-08-26-03-42-Spring-Green4.jpg"),
+    ],
   },
   // ---------- Completed ----------
   {
